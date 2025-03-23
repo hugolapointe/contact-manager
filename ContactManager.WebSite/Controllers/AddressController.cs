@@ -26,7 +26,7 @@ public class AddressController(
         context.Entry(contact).Collection(c => c.Addresses).Load();
 
         var addresses = contact!.Addresses
-            .Select(address => new AddressDetailsVM() {
+            .Select(address => new AddressItem() {
                 Id = address.Id,
                 StreetNumber = address.StreetNumber,
                 StreetName = address.StreetName,
@@ -52,7 +52,7 @@ public class AddressController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Guid contactId, AddressCreateVM vm) {
+    public IActionResult Create(Guid contactId, AddressCreate vm) {
         if (!ModelState.IsValid) {
             ViewBag.ContactId = contactId;
             return View(vm);
@@ -86,7 +86,7 @@ public class AddressController(
         asserts.Exists(toEdit.Contact, "Contact not found.");
         asserts.IsOwnedByCurrentUser(toEdit!.Contact, User);
 
-        var vm = new AddressEditVM() {
+        var vm = new AddressEdit() {
             StreetNumber = toEdit.StreetNumber,
             StreetName = toEdit.StreetName,
             CityName = toEdit.CityName,
@@ -99,7 +99,7 @@ public class AddressController(
     }
 
     [HttpPost]
-    public IActionResult Edit(Guid id, AddressEditVM vm) {
+    public IActionResult Edit(Guid id, AddressEdit vm) {
         var toEdit = context.Addresses.Find(id);
 
         asserts.Exists(toEdit, "Address not found.");

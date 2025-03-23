@@ -25,7 +25,7 @@ public class ContactController(
         context.Entry(user!).Collection(u => u.Contacts).Load();
 
         var contacts = user!.Contacts
-            .Select(contact => new ContactDetailsVM() {
+            .Select(contact => new ContactItem() {
                 Id = contact.Id,
                 FirstName = contact.FirstName,
                 LastName = contact.LastName,
@@ -42,7 +42,7 @@ public class ContactController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(ContactCreateVM vm) {
+    public async Task<IActionResult> Create(ContactCreate vm) {
         if (!ModelState.IsValid) {
             return View(vm);
         }
@@ -73,7 +73,7 @@ public class ContactController(
         asserts.Exists(toEdit, "Contact not found.");
         asserts.IsOwnedByCurrentUser(toEdit, User);
 
-        var vm = new ContactEditVM() {
+        var vm = new ContactEdit() {
             FirstName = toEdit.FirstName,
             LastName = toEdit.LastName,
             DateOfBirth = toEdit.DateOfBirth,
@@ -85,7 +85,7 @@ public class ContactController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(Guid id, ContactEditVM vm) {
+    public IActionResult Edit(Guid id, ContactEdit vm) {
         if (!ModelState.IsValid) {
             ViewBag.Id = id;
             return View(vm);

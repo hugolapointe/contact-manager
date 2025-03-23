@@ -25,7 +25,7 @@ public class AccountController(
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> LogIn(LogInVM vm, string? returnUrl = null) {
+    public async Task<IActionResult> LogIn(LogIn vm, string? returnUrl = null) {
         if (!ModelState.IsValid) {
             ViewBag.ReturnUrl = returnUrl;
             return View(vm);
@@ -62,14 +62,14 @@ public class AccountController(
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(RegisterVM vm) {
+    public async Task<IActionResult> Register(Register vm) {
         if (!ModelState.IsValid) {
             return View(vm);
         }
 
         try {
             var newUser = new User(vm.UserName);
-            var result = await userManager.CreateAsync(newUser);
+            var result = await userManager.CreateAsync(newUser, vm.Password);
 
             if (!result.Succeeded) {
                 ModelState.AddModelError(string.Empty, "Unable to register a new user.");

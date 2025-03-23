@@ -19,11 +19,11 @@ public class UserController(
 
     [HttpGet]
     public async Task<IActionResult> Manage() {
-        var vm = new List<UserDetailsVM>();
+        var vm = new List<UserItem>();
 
         foreach (var user in userManager.Users) {
             var userRoles = await userManager.GetRolesAsync(user);
-            vm.Add(new UserDetailsVM {
+            vm.Add(new UserItem {
                 Id = user.Id,
                 UserName = user.UserName!.Trim(),
                 RoleName = userRoles.SingleOrDefault(string.Empty)
@@ -37,7 +37,7 @@ public class UserController(
     public IActionResult Create() {
         var passwordGenerated = PasswordGenerator.Generate();
 
-        return View(new UserCreateVM() {
+        return View(new UserCreate() {
             Password = passwordGenerated,
             PasswordConfirmation = passwordGenerated
         });
@@ -45,7 +45,7 @@ public class UserController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(UserCreateVM vm) {
+    public async Task<IActionResult> Create(UserCreate vm) {
         if (!ModelState.IsValid) {
             return View(vm);
         }
@@ -91,7 +91,7 @@ public class UserController(
             throw new Exception("Unable to reset password.");
         }
 
-        return View(new ResetPasswordVM {
+        return View(new ResetPassword {
             UserName = user.UserName!.Trim(),
             NewPassword = newPassword,
         });
