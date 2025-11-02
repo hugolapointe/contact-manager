@@ -17,15 +17,15 @@ public class AddressController(
     private readonly DomainAsserts asserts = asserts;
 
     [HttpGet]
-    public IActionResult Manage(Guid contactId) {
-        var contact = context.Contacts.Find(contactId);
+    public async Task<IActionResult> Manage(Guid contactId) {
+        var contact = await context.Contacts.FindAsync(contactId);
 
         asserts.Exists(contact, "Contact not found.");
         asserts.IsOwnedByCurrentUser(contact, User);
 
-        context.Entry(contact).Collection(c => c.Addresses).Load();
+        await context.Entry(contact!).Collection(c => c.Addresses).LoadAsync();
 
-        var addresses = contact!.Addresses
+        var addresses = contact.Addresses
             .Select(address => new AddressItem() {
                 Id = address.Id,
                 StreetNumber = address.StreetNumber,
@@ -40,8 +40,8 @@ public class AddressController(
     }
 
     [HttpGet]
-    public IActionResult Create(Guid contactId) {
-        var contact = context.Contacts.Find(contactId);
+    public async Task<IActionResult> Create(Guid contactId) {
+        var contact = await context.Contacts.FindAsync(contactId);
 
         asserts.Exists(contact, "Contact not found.");
         asserts.IsOwnedByCurrentUser(contact, User);
@@ -52,13 +52,13 @@ public class AddressController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Guid contactId, AddressCreate vm) {
+    public async Task<IActionResult> Create(Guid contactId, AddressCreate vm) {
         if (!ModelState.IsValid) {
             ViewBag.ContactId = contactId;
             return View(vm);
         }
 
-        var contact = context.Contacts.Find(contactId);
+        var contact = await context.Contacts.FindAsync(contactId);
 
         asserts.Exists(contact, "Contact not found.");
         asserts.IsOwnedByCurrentUser(contact, User);
@@ -69,22 +69,22 @@ public class AddressController(
             CityName = vm.CityName!,
             PostalCode = vm.PostalCode!,
         };
-        contact.Addresses.Add(toAdd);
-        context.SaveChanges();
+        contact!.Addresses.Add(toAdd);
+        await context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Manage), new { contactId });
     }
 
     [HttpGet]   
-    public IActionResult Edit(Guid id) {
-        var toEdit = context.Addresses.Find(id);
+    public async Task<IActionResult> Edit(Guid id) {
+        var toEdit = await context.Addresses.FindAsync(id);
 
         asserts.Exists(toEdit, "Address not found.");
 
-        context.Entry(toEdit).Reference(a => a.Contact).Load();
+        await context.Entry(toEdit!).Reference(a => a.Contact).LoadAsync();
 
         asserts.Exists(toEdit.Contact, "Contact not found.");
-        asserts.IsOwnedByCurrentUser(toEdit!.Contact, User);
+        asserts.IsOwnedByCurrentUser(toEdit.Contact, User);
 
         var vm = new AddressEdit() {
             StreetNumber = toEdit.StreetNumber,
@@ -100,18 +100,18 @@ public class AddressController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(Guid id, AddressEdit vm) {
-        var toEdit = context.Addresses.Find(id);
+    public async Task<IActionResult> Edit(Guid id, AddressEdit vm) {
+        var toEdit = await context.Addresses.FindAsync(id);
 
         asserts.Exists(toEdit, "Address not found.");
 
         if (!ModelState.IsValid) {
             ViewBag.Id = id;
-            ViewBag.ContactId = toEdit.ContactId;
+            ViewBag.ContactId = toEdit!.ContactId;
             return View(vm);
         }
 
-        context.Entry(toEdit).Reference(a => a.Contact).Load();
+        await context.Entry(toEdit!).Reference(a => a.Contact).LoadAsync();
 
         asserts.Exists(toEdit.Contact, "Contact not found.");
         asserts.IsOwnedByCurrentUser(toEdit.Contact, User);
@@ -120,25 +120,25 @@ public class AddressController(
         toEdit.StreetName = vm.StreetName!;
         toEdit.CityName = vm.CityName!;
         toEdit.PostalCode = vm.PostalCode!;
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Manage),
             new { contactId = toEdit.Contact.Id });
     }
 
     [HttpGet]
-    public IActionResult Remove(Guid id) {
-        var toRemove = context.Addresses.Find(id);
+    public async Task<IActionResult> Remove(Guid id) {
+        var toRemove = await context.Addresses.FindAsync(id);
 
         asserts.Exists(toRemove, "Address not found.");
 
-        context.Entry(toRemove).Reference(a => a.Contact).Load();
+        await context.Entry(toRemove!).Reference(a => a.Contact).LoadAsync();
 
         asserts.Exists(toRemove.Contact, "Contact not found.");
         asserts.IsOwnedByCurrentUser(toRemove.Contact, User);
 
         context.Addresses.Remove(toRemove);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Manage),
             new { contactId = toRemove.Contact.Id });

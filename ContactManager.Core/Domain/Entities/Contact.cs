@@ -3,8 +3,6 @@
 namespace ContactManager.Core.Domain.Entities;
 
 public class Contact {
-    private const int DAYS_PER_YEAR = 365;
-
     public Guid Id { get; set; }
     public Guid OwnerId { get; set; }
 
@@ -12,7 +10,16 @@ public class Contact {
     public required string LastName { get; set; }
     public required DateTime DateOfBirth { get; set; }
 
-    public int Age => (DateTime.Today - DateOfBirth).Days / DAYS_PER_YEAR;
+    public int Age {
+        get {
+            var today = DateTime.Today;
+            var age = today.Year - DateOfBirth.Year;
+            if (DateOfBirth.Date > today.AddYears(-age)) {
+                age--;
+            }
+            return age;
+        }
+    }
     public string FullName => $"{FirstName} {LastName}";
 
     // Navigation Properties
