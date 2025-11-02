@@ -26,10 +26,10 @@ public class PasswordValidator : AbstractValidator<string?> {
     private const RegexOptions REGEX_OPTIONS = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant;
 
     private const int LENGTH_MIN = 8;
-    private const string REGEX_UPPERCASE = @"[A-Z]*";
-    private const string REGEX_LOWERCASE = @"[a-z]*";
-    private const string REGEX_DIGIT = @"[0-9]*";
-    private const string REGEX_NOT_SPACE = @"[^\s]*";
+    private const string REGEX_UPPERCASE = @"[A-Z]+";
+    private const string REGEX_LOWERCASE = @"[a-z]+";
+    private const string REGEX_DIGIT = @"[0-9]+";
+    private const string REGEX_NOT_SPACE = @"^[^\s]+$";
 
     public PasswordValidator() {
         RuleFor(password => password)

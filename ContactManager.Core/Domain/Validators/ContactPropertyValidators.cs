@@ -11,9 +11,9 @@ public class FirstNameValidator : AbstractValidator<string?> {
             .NotEmpty()
             .WithMessage("Please provide a First Name.")
             .Length(FIRST_NAME_LENGTH_MIN, FIRST_NAME_LENGTH_MAX)
-            .WithMessage("Please provide a First Name between 3 and 30 caracters.")
+            .WithMessage($"Please provide a First Name between {FIRST_NAME_LENGTH_MIN} and {FIRST_NAME_LENGTH_MAX} characters.")
             .IsValidName()
-            .WithMessage("Please provide a First Name who contains only letters.");
+            .WithMessage("Please provide a First Name that contains only letters.");
     }
 }
 
@@ -26,9 +26,9 @@ public class LastNameValidator : AbstractValidator<string?> {
             .NotEmpty()
             .WithMessage("Please provide a Last Name.")
             .Length(LAST_NAME_LENGTH_MIN, LAST_NAME_LENGTH_MAX)
-            .WithMessage("Please provide a Last Name between 3 and 30 caracters.")
+            .WithMessage($"Please provide a Last Name between {LAST_NAME_LENGTH_MIN} and {LAST_NAME_LENGTH_MAX} characters.")
             .IsValidName()
-            .WithMessage("Please provide a Last Name who contains only letters.");
+            .WithMessage("Please provide a Last Name that contains only letters.");
     }
 }
 

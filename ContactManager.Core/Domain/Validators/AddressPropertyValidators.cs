@@ -24,9 +24,9 @@ public class StreetNameValidator : AbstractValidator<string?> {
             .NotEmpty()
             .WithMessage("Please provide a Street Name.")
             .Length(STREET_NAME_LENGTH_MIN, STREET_NAME_LENGTH_MAX)
-            .WithMessage("Please provide a Street Name between 5 and 30 caracters.")
+            .WithMessage($"Please provide a Street Name between {STREET_NAME_LENGTH_MIN} and {STREET_NAME_LENGTH_MAX} characters.")
             .IsValidName()
-            .WithMessage("Please provide a Street Name who contains only letters and spaces.");
+            .WithMessage("Please provide a Street Name that contains only letters and spaces.");
     }
 }
 
@@ -39,9 +39,9 @@ public class CityNameValidator : AbstractValidator<string?> {
             .NotEmpty()
             .WithMessage("Please provide a City Name.")
             .Length(CITY_NAME_LENGTH_MIN, CITY_NAME_LENGTH_MAX)
-            .WithMessage("Please provide a City Name between 5 and 30 caracters.")
+            .WithMessage($"Please provide a City Name between {CITY_NAME_LENGTH_MIN} and {CITY_NAME_LENGTH_MAX} characters.")
             .IsValidName()
-            .WithMessage("Please provide a City Name who contains only letters and spaces.");
+            .WithMessage("Please provide a City Name that contains only letters and spaces.");
     }
 }
 

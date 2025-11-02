@@ -2,6 +2,9 @@
 
 namespace ContactManager.Core.Domain.Entities;
 
+/// <summary>
+/// Represents a physical address for a contact.
+/// </summary>
 public class Address {
 
     public Guid Id { get; set; }

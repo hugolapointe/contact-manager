@@ -2,9 +2,10 @@
 
 namespace ContactManager.Core.Domain.Entities;
 
+/// <summary>
+/// Represents a contact in the contact management system.
+/// </summary>
 public class Contact {
-    private const int DAYS_PER_YEAR = 365;
-
     public Guid Id { get; set; }
     public Guid OwnerId { get; set; }
 
@@ -12,11 +13,27 @@ public class Contact {
     public required string LastName { get; set; }
     public required DateTime DateOfBirth { get; set; }
 
-    public int Age => (DateTime.Today - DateOfBirth).Days / DAYS_PER_YEAR;
+    /// <summary>
+    /// Gets the calculated age of the contact based on their date of birth.
+    /// </summary>
+    public int Age {
+        get {
+            var today = DateTime.Today;
+            var age = today.Year - DateOfBirth.Year;
+            if (DateOfBirth.Date > today.AddYears(-age)) {
+                age--;
+            }
+            return age;
+        }
+    }
+
+    /// <summary>
+    /// Gets the full name of the contact (FirstName + LastName).
+    /// </summary>
     public string FullName => $"{FirstName} {LastName}";
 
     // Navigation Properties
     [ForeignKey(nameof(OwnerId))]
-    public virtual User Owner { get; set; }
+    public virtual User? Owner { get; set; }
     public List<Address> Addresses { get; } = new();
 }

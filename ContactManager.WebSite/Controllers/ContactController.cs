@@ -61,20 +61,20 @@ public class ContactController(
 
         var user = await userManager.GetUserAsync(User);
         user!.Contacts.Add(toAdd);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Manage));
     }
 
     [HttpGet]
-    public IActionResult Edit(Guid id) {
-        var toEdit = context.Contacts.Find(id);
+    public async Task<IActionResult> Edit(Guid id) {
+        var toEdit = await context.Contacts.FindAsync(id);
 
         asserts.Exists(toEdit, "Contact not found.");
         asserts.IsOwnedByCurrentUser(toEdit, User);
 
         var vm = new ContactEdit() {
-            FirstName = toEdit.FirstName,
+            FirstName = toEdit!.FirstName,
             LastName = toEdit.LastName,
             DateOfBirth = toEdit.DateOfBirth,
         };
@@ -85,34 +85,34 @@ public class ContactController(
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(Guid id, ContactEdit vm) {
+    public async Task<IActionResult> Edit(Guid id, ContactEdit vm) {
         if (!ModelState.IsValid) {
             ViewBag.Id = id;
             return View(vm);
         }
 
-        var toEdit = context.Contacts.Find(id);
+        var toEdit = await context.Contacts.FindAsync(id);
 
         asserts.Exists(toEdit, "Contact not found.");
         asserts.IsOwnedByCurrentUser(toEdit, User);
 
-        toEdit.FirstName = vm.FirstName!;
+        toEdit!.FirstName = vm.FirstName!;
         toEdit.LastName = vm.LastName!;
         toEdit.DateOfBirth = vm.DateOfBirth!.Value;
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Manage));
     }
 
     [HttpGet]
-    public IActionResult Remove(Guid id) {
-        var toRemove = context.Contacts.Find(id);
+    public async Task<IActionResult> Remove(Guid id) {
+        var toRemove = await context.Contacts.FindAsync(id);
 
         asserts.Exists(toRemove, "Contact not found.");
         asserts.IsOwnedByCurrentUser(toRemove, User);
 
-        context.Contacts.Remove(toRemove);
-        context.SaveChanges();
+        context.Contacts.Remove(toRemove!);
+        await context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Manage));
     }

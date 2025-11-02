@@ -2,6 +2,9 @@
 
 namespace ContactManager.WebSite.Utilities;
 
+/// <summary>
+/// Generates random passwords that meet security requirements.
+/// </summary>
 public class PasswordGenerator {
     private static Random RANDOM = new();
 
@@ -16,6 +19,11 @@ public class PasswordGenerator {
     private const int DIGITS_MIN = 1;
     private const int SPECIAL_MIN = 1;
 
+    /// <summary>
+    /// Generates a random password with at least one lowercase letter, one uppercase letter, 
+    /// one digit, and one special character.
+    /// </summary>
+    /// <returns>A randomly generated password of at least 10 characters.</returns>
     public static string Generate() {
         var password = new StringBuilder();
 
