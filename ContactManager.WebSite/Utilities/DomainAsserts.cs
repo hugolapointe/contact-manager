@@ -41,8 +41,14 @@ public class DomainAsserts(UserManager<User> userManager) {
         }
 
         var ownerIdValue = ownerIdProp.GetValue(entity);
+        
+        // Compare as Guid if the OwnerId is a Guid, otherwise compare as strings
+        bool isOwner = ownerIdValue switch {
+            Guid guidValue when Guid.TryParse(userId, out var userGuid) => guidValue == userGuid,
+            _ => Equals(ownerIdValue?.ToString(), userId)
+        };
 
-        if (!Equals(ownerIdValue?.ToString(), userId)) {
+        if (!isOwner) {
             throw new UnauthorizedAccessException(errorMessage);
         }
     }
