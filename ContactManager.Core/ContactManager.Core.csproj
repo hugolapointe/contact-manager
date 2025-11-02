@@ -7,15 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="11.9.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.21" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.21" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.21">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.21" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.21" />
   </ItemGroup>
 
 </Project>
