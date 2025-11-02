@@ -26,7 +26,7 @@ public class DomainAsserts(UserManager<User> userManager) {
 
         var ownerIdValue = ownerIdProp.GetValue(entity);
 
-        if (Equals(ownerIdValue, userId)) {
+        if (!Equals(ownerIdValue?.ToString(), userId)) {
             throw new UnauthorizedAccessException(errorMessage);
         }
     }

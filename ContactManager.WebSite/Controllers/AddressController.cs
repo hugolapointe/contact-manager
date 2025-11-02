@@ -99,6 +99,7 @@ public class AddressController(
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Edit(Guid id, AddressEdit vm) {
         var toEdit = context.Addresses.Find(id);
 

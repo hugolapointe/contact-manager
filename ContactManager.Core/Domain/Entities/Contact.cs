@@ -17,6 +17,6 @@ public class Contact {
 
     // Navigation Properties
     [ForeignKey(nameof(OwnerId))]
-    public virtual User Owner { get; set; }
+    public virtual User? Owner { get; set; }
     public List<Address> Addresses { get; } = new();
 }
