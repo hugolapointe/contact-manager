@@ -3,18 +3,24 @@
 using FluentValidation;
 
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ContactManager.WebSite.ViewModels.Contact;
 
 public class ContactEdit {
+    [HiddenInput(DisplayValue = false)]
+    [Editable(false)]
+    public Guid ContactId { get; set; }
+
     [Display(Name = "First Name")]
     public string? FirstName { get; set; }
 
     [Display(Name = "Last Name")]
     public string? LastName { get; set; }
 
-    [Display(Name = "Date Of Birth")]
+    [Display(Name = "Date of Birth")]
     [DataType(DataType.Date)]
+    [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime? DateOfBirth { get; set; }
 
     public class Validator : AbstractValidator<ContactEdit> {
@@ -26,12 +32,12 @@ public class ContactEdit {
 
             RuleFor(vm => vm.LastName)
                 .NotNull()
-                    .WithMessage("Please provde a last name.")
+                    .WithMessage("Please provide a last name.")
                 .SetValidator(new LastNameValidator());
 
             RuleFor(vm => vm.DateOfBirth)
                 .NotNull()
-                    .WithMessage("Please provide a Date Of Birth.")
+                    .WithMessage("Please provide a date of birth.")
                 .SetValidator(new BirthDateValidator());
         }
     }

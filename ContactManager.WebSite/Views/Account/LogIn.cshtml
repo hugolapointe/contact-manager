@@ -1,7 +1,7 @@
-﻿@model LogIn
+﻿@model Login
 
 @{
-    ViewData["Title"] = "LogIn";
+    ViewData["Title"] = "Login";
 }
 
 <h1>Log In</h1>
@@ -11,7 +11,8 @@
     new {}, new { @class = "btn btn-primary" })
 </div>
 
-<form asp-action="LogIn" asp-route-returnUrl="@ViewBag.ReturnUrl">
+<form method="post" asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl">
+    <input asp-for="ReturnUrl" type="hidden" />
     <div class="row">
         <div class="col-md-4">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -32,7 +33,7 @@
                 <span asp-validation-for="RememberMe" class="text-danger"></span>
             </div>
             <div class="form-group mt-2 mb-2">
-                <input type="submit" value="LogIn" class="btn btn-primary" />
+                <input type="submit" value="Login" class="btn btn-primary" />
             </div>
         </div>
     </div>

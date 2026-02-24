@@ -14,7 +14,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(model => model.Id)</th>
             <th>@Html.DisplayNameFor(model => model.FirstName)</th>
             <th>@Html.DisplayNameFor(model => model.LastName)</th>
             <th>@Html.DisplayNameFor(model => model.Age)</th>
@@ -24,7 +23,6 @@
     <tbody>
         @foreach (var item in Model) {
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.Id)</td>
                 <td>@Html.DisplayFor(modelItem => item.FirstName)</td>
                 <td>@Html.DisplayFor(modelItem => item.LastName)</td>
                 <td>@Html.DisplayFor(modelItem => item.Age)</td>
@@ -34,7 +32,7 @@
                     @Html.ActionLink("Edit", "Edit",
                              new { id = item.Id }, new { @class = "btn btn-primary" })
 
-                    <form asp-action="Remove" asp-route-id="@item.Id" class="d-inline-block">
+                    <form method="post" asp-action="Remove" asp-route-id="@item.Id" class="d-inline-block">
                         <button type="button" class="btn btn-danger delete-button" data-name="@item.FirstName">
                             Remove
                         </button>
@@ -45,18 +43,3 @@
     </tbody>
 </table>
 
-@section Scripts {
-    <script>
-        $(function () {
-            $('.delete-button').click(function () {
-                const name = $(this).data('name') || "this item";
-
-                const message = `Are you sure you want to delete ${name}?`;
-
-                if (confirm(message)) {
-                    $(this).parent("form").submit();
-                }
-            });
-        });
-    </script>
-}

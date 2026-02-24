@@ -1,6 +1,6 @@
 using ContactManager.Core;
 using ContactManager.Core.Domain.Entities;
-using ContactManager.WebSite.Utilities;
+using ContactManager.WebSite.Authorization;
 
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -15,15 +15,20 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ContactManagerContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<User, IdentityRole<Guid>>()
+builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options => {
+        options.Password.RequiredLength = 8;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireDigit = true;
+        options.Password.RequireNonAlphanumeric = true;
+    })
     .AddEntityFrameworkStores<ContactManagerContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
 builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-
-builder.Services.AddScoped<DomainAsserts>();
 
 var app = builder.Build();
 

@@ -1,13 +1,10 @@
 ﻿using System.Text;
+using System.Security.Cryptography;
 
 namespace ContactManager.WebSite.Utilities;
 
-/// <summary>
-/// Generates random passwords that meet security requirements.
-/// </summary>
+// Génère un mot de passe aléatoire conforme aux règles Identity.
 public class PasswordGenerator {
-    private static Random RANDOM = new();
-
     private const string LOWERCASES = "abcdefghijklmnopqrstuvwxyz";
     private const string UPPERCASES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private const string DIGITS = "0123456789";
@@ -19,36 +16,35 @@ public class PasswordGenerator {
     private const int DIGITS_MIN = 1;
     private const int SPECIAL_MIN = 1;
 
-    /// <summary>
-    /// Generates a random password with at least one lowercase letter, one uppercase letter, 
-    /// one digit, and one special character.
-    /// </summary>
-    /// <returns>A randomly generated password of at least 10 characters.</returns>
     public static string Generate() {
         var password = new StringBuilder();
 
         for (int i = 0; i < LOWERCASE_MIN; i++) {
-            password.Append(LOWERCASES[RANDOM.Next(LOWERCASES.Length)]);
+            password.Append(LOWERCASES[RandomNumberGenerator.GetInt32(LOWERCASES.Length)]);
         }
 
         for (int i = 0; i < UPPERCASE_MIN; i++) {
-            password.Append(UPPERCASES[RANDOM.Next(UPPERCASES.Length)]);
+            password.Append(UPPERCASES[RandomNumberGenerator.GetInt32(UPPERCASES.Length)]);
         }
 
         for (int i = 0; i < DIGITS_MIN; i++) {
-            password.Append(DIGITS[RANDOM.Next(DIGITS.Length)]);
+            password.Append(DIGITS[RandomNumberGenerator.GetInt32(DIGITS.Length)]);
         }
 
         for (int i = 0; i < SPECIAL_MIN; i++) {
-            password.Append(SPECIALS[RANDOM.Next(SPECIALS.Length)]);
+            password.Append(SPECIALS[RandomNumberGenerator.GetInt32(SPECIALS.Length)]);
         }
 
         while (password.Length < LENGTH_MIN) {
-            password.Append(LOWERCASES[RANDOM.Next(LOWERCASES.Length)]);
+            password.Append(LOWERCASES[RandomNumberGenerator.GetInt32(LOWERCASES.Length)]);
         }
 
-        return new string(password.ToString().ToCharArray()
-            .OrderBy(x => RANDOM.Next()).ToArray()
-        );
+        var chars = password.ToString().ToCharArray();
+        for (int i = chars.Length - 1; i > 0; i--) {
+            var j = RandomNumberGenerator.GetInt32(i + 1);
+            (chars[i], chars[j]) = (chars[j], chars[i]);
+        }
+
+        return new string(chars);
     }
 }

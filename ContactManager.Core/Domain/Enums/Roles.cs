@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿namespace ContactManager.Core.Domain.Enums;
 
-namespace ContactManager.Core.Domain.Entities;
-
-public sealed class Roles {
-    public static IdentityRole<Guid> Administrator => new IdentityRole<Guid>("Administrator");
-    public static IdentityRole<Guid> User => new IdentityRole<Guid>("User");
+public static class Roles {
+    public const string Administrator = "Administrator";
+    public const string User = "User";
 }

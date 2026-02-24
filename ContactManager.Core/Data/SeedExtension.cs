@@ -1,4 +1,5 @@
-﻿using ContactManager.Core.Domain.Entities;
+using ContactManager.Core.Domain.Entities;
+using ContactManager.Core.Domain.Enums;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -6,15 +7,17 @@ using Microsoft.EntityFrameworkCore;
 namespace ContactManager.Core.Data;
 
 public static class SeedExtension {
-    private static readonly PasswordHasher<User> passwordHasher = new();
+    private static readonly PasswordHasher<AppUser> passwordHasher = new();
 
     public static void Seed(this ModelBuilder builder) {
-        var adminRole = addRole("Administrator");
-        _ = addRole("Utilisateur");
+        var adminRole = addRole(Roles.Administrator);
+        _ = addRole(Roles.User);
         var hugoUser = addUser("hlapointe", "Admin123!");
         addUserToRole(hugoUser, adminRole);
-        var cegepAddress = addAddress(3000, "Boulevard Boullé", "Saint-Hyacinthe", "J2S 1H9");
-        _ = addContactWithDefaultAddressToUser("Sébastien", "Pouliot", new DateTime(1980, 02, 06), cegepAddress, hugoUser);
+        addContactWithAddress(
+            "Sébastien", "Pouliot", new DateTime(1980, 02, 06),
+            3000, "Boulevard Boullé", "Saint-Hyacinthe", "J2S 1H9",
+            hugoUser);
 
         IdentityRole<Guid> addRole(string name) {
             var newRole = new IdentityRole<Guid> {
@@ -27,50 +30,46 @@ public static class SeedExtension {
             return newRole;
         }
 
-        void addUserToRole(User user, IdentityRole<Guid> role) {
+        void addUserToRole(AppUser user, IdentityRole<Guid> role) {
             builder.Entity<IdentityUserRole<Guid>>().HasData(new IdentityUserRole<Guid> {
                 UserId = user.Id,
                 RoleId = role.Id,
             });
         }
 
-        User addUser(string userName, string password) {
-            var newUser = new User(userName) {
-                Id = Guid.NewGuid(),
-                NormalizedUserName = userName.ToUpper(),
-                SecurityStamp = Guid.NewGuid().ToString(),
-            };
+        AppUser addUser(string userName, string password) {
+            var newUser = AppUser.Create(userName);
+            newUser.Id = Guid.NewGuid();
+            newUser.NormalizedUserName = userName.ToUpper();
+            newUser.SecurityStamp = Guid.NewGuid().ToString();
             newUser.PasswordHash = passwordHasher.HashPassword(newUser, password);
-            builder.Entity<User>().HasData(newUser);
+            builder.Entity<AppUser>().HasData(newUser);
 
             return newUser;
         }
 
-        Address addAddress(int streetNumber, string streetName, string city, string postalCode) {
-            var newAddress = new Address() {
-                Id = Guid.NewGuid(),
-                StreetNumber = streetNumber,
-                StreetName = streetName,
-                CityName = city,
-                PostalCode = postalCode
-            };
-            builder.Entity<Address>().HasData(newAddress);
+        void addContactWithAddress(
+            string firstName, string lastName, DateTime dob,
+            int streetNumber, string streetName, string city, string postalCode,
+            AppUser user) {
+            var contactId = Guid.NewGuid();
 
-            return newAddress;
-        }
-
-        Contact addContactWithDefaultAddressToUser(string firstName, string lastName, DateTime dob, Address address, User user) {
-            var newContact = new Contact() {
-                Id = Guid.NewGuid(),
+            builder.Entity<Contact>().HasData(new {
+                Id = contactId,
                 OwnerId = user.Id,
                 FirstName = firstName,
                 LastName = lastName,
                 DateOfBirth = dob,
-            };
-            address.ContactId = newContact.Id;
-            builder.Entity<Contact>().HasData(newContact);
+            });
 
-            return newContact;
+            builder.Entity<Address>().HasData(new {
+                Id = Guid.NewGuid(),
+                ContactId = contactId,
+                StreetNumber = streetNumber,
+                StreetName = streetName,
+                CityName = city,
+                PostalCode = postalCode,
+            });
         }
     }
 }

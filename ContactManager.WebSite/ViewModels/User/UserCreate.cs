@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 namespace ContactManager.WebSite.ViewModels.User;
 
 public class UserCreate {
-    [Display(Name = "UserName")]
+    [Display(Name = "Username")]
     public string? UserName { get; set; }
 
     [Display(Name = "Role")]
@@ -17,7 +17,7 @@ public class UserCreate {
     [DataType(DataType.Password)]
     public string? Password { get; set; }
 
-    [Display(Name = "Password Confirmation")]
+    [Display(Name = "Confirm Password")]
     [DataType(DataType.Password)]
     public string? PasswordConfirmation { get; set; }
 
@@ -28,12 +28,14 @@ public class UserCreate {
 
             RuleFor(vm => vm.RoleId)
                 .NotEmpty()
-                    .WithMessage("Please provide a RoleId.");
+                    .WithMessage("Please select a role.");
 
             RuleFor(vm => vm.Password)
                 .SetValidator(new PasswordValidator());
 
             RuleFor(vm => vm.PasswordConfirmation)
+                .NotEmpty()
+                    .WithMessage("Please confirm the password.")
                 .Equal(vm => vm.Password)
                     .WithMessage("The password and confirmation password do not match.");
         }

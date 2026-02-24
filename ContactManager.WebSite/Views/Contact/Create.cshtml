@@ -8,10 +8,10 @@
 
 <div class="mt-2 mb-2">
     @Html.ActionLink("Back", "Manage",
-        new { contactId = @ViewBag.contactId }, new { @class = "btn btn-secondary" })
+    new { }, new { @class = "btn btn-secondary" })
 </div>
 
-<form asp-action="Create">
+<form method="post" asp-action="Create">
     <h4 class="mt-2">Contact Information</h4>
     <hr />
     <div class="row">
@@ -29,7 +29,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="DateOfBirth" class="control-label"></label>
-                <input asp-for="DateOfBirth" class="form-control" />
+                <input asp-for="DateOfBirth" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" />
                 <span asp-validation-for="DateOfBirth" class="text-danger"></span>
             </div>
         </div>

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContactManager.Core;
 
-public class ContactManagerContext : IdentityDbContext<User, IdentityRole<Guid>, Guid> {
+public class ContactManagerContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid> {
 
     public DbSet<Contact> Contacts { get; set; }
     public DbSet<Address> Addresses { get; set; }
@@ -17,7 +17,7 @@ public class ContactManagerContext : IdentityDbContext<User, IdentityRole<Guid>,
         base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
-        modelBuilder.Entity<User>()
+        modelBuilder.Entity<AppUser>()
             .HasMany(user => user.Contacts)
             .WithOne(contact => contact.Owner)
             .OnDelete(DeleteBehavior.Cascade);

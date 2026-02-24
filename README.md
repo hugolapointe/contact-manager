@@ -58,8 +58,7 @@ Cette séparation des responsabilités facilite la maintenance, les tests et l'�
 [Authorize]
 public class ContactController(
     ContactManagerContext context,
-    UserManager<User> userManager,
-    DomainAsserts asserts) : Controller {
+    UserManager<User> userManager) : Controller {
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -68,13 +67,8 @@ public class ContactController(
             return View(vm);
         }
 
-        var toAdd = new Contact() {
-            FirstName = vm.FirstName!,
-            LastName = vm.LastName!,
-            DateOfBirth = vm.DateOfBirth!.Value,
-        };
-
         var user = await userManager.GetUserAsync(User);
+        var toAdd = Contact.Create(user!.Id, vm.FirstName!, vm.LastName!, vm.DateOfBirth!.Value);
         user!.Contacts.Add(toAdd);
         await context.SaveChangesAsync();
 
@@ -122,7 +116,13 @@ ASP.NET Core Identity est un système complet de gestion d'identité qui fournit
 
 ```csharp
 // Program.cs - Configuration d'Identity
-builder.Services.AddIdentity<User, IdentityRole<Guid>>()
+builder.Services.AddIdentity<User, IdentityRole<Guid>>(options => {
+    options.Password.RequiredLength = 8;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireDigit = true;
+    options.Password.RequireNonAlphanumeric = true;
+})
     .AddEntityFrameworkStores<ContactManagerContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
@@ -145,7 +145,9 @@ public async Task<IActionResult> Register(Register vm) {
     var result = await userManager.CreateAsync(newUser, vm.Password);
 
     if (!result.Succeeded) {
-        ModelState.AddModelError(string.Empty, "Unable to register.");
+        foreach (var error in result.Errors) {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
         return View(vm);
     }
 
@@ -167,7 +169,7 @@ public class ContactController : Controller {
 
 - `/ContactManager.Core/Domain/Entities/User.cs` - Entité utilisateur personnalisée
 - `/ContactManager.WebSite/Controllers/AccountController.cs` - Gestion de l'authentification
-- `/ContactManager.WebSite/ViewModels/Account/` - ViewModels (LogIn, Register)
+- `/ContactManager.WebSite/ViewModels/Account/` - ViewModels (Login, Register)
 - `/ContactManager.WebSite/Program.cs` - Configuration d'Identity
 
 #### Pourquoi c'est important?
@@ -318,18 +320,22 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 ##### Exemple de validateur réutilisable
 
 ```csharp
-// ContactPropertyValidators.cs
+// PropertyValidators.cs
 public class FirstNameValidator : AbstractValidator<string?> {
     private const int FIRST_NAME_LENGTH_MIN = 2;
     private const int FIRST_NAME_LENGTH_MAX = 30;
 
     public FirstNameValidator() {
-        Transform(firstName => firstName, firstName => firstName!.Trim())
+        RuleFor(firstName => firstName)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("Please provide a First Name.")
-            .Length(FIRST_NAME_LENGTH_MIN, FIRST_NAME_LENGTH_MAX)
+            .Must(firstName => {
+                var trimmed = firstName!.Trim();
+                return trimmed.Length >= FIRST_NAME_LENGTH_MIN && trimmed.Length <= FIRST_NAME_LENGTH_MAX;
+            })
             .WithMessage($"Please provide a First Name between {FIRST_NAME_LENGTH_MIN} and {FIRST_NAME_LENGTH_MAX} characters.")
-            .IsValidName()
+            .IsValidPersonName()
             .WithMessage("Please provide a First Name that contains only letters.");
     }
 }
@@ -502,32 +508,27 @@ User (Racine d'agrégat)
 
 Les suppressions sont en cascade : supprimer un User supprime ses Contacts et leurs Addresses.
 
-##### DomainAsserts - Règles métier
+##### ResourceOwnerFilter - Ownership policy (filter MVC)
 
 ```csharp
-// DomainAsserts.cs
-public class DomainAsserts(UserManager<User> userManager) {
-
-    public void Exists(object entity, string errorMessage = "The resource cannot be found.") {
-        if (entity is null) {
-            throw new ArgumentNullException(errorMessage);
-        }
-    }
-
-    public void IsOwnedByCurrentUser(object entity, ClaimsPrincipal user,
-        string errorMessage = "You must own the resource.") {
-        var userId = userManager.GetUserId(user);
-        var ownerIdProp = entity.GetType().GetProperty("OwnerId");
-        // ... vérification de propriété (voir fichier complet)
+// ResourceOwnerFilter.cs
+public class ResourceOwnerFilter(...) : IAsyncActionFilter {
+    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next) {
+        // Charge la ressource depuis la route
+        // Vérifie l'ownership via IAuthorizationService + policy Owner
+        // Place la ressource validée dans HttpContext.Items
     }
 }
 ```
 
 Utilisation :
 ```csharp
-var toEdit = await context.Contacts.FindAsync(id);
-asserts.Exists(toEdit, "Contact not found.");
-asserts.IsOwnedByCurrentUser(toEdit, User);
+[HttpGet]
+[ResourceOwner(typeof(Contact))]
+public IActionResult Edit(Guid id) {
+    var contact = HttpContext.GetResourceOwner<Contact>();
+    // ...
+}
 ```
 
 ##### Séparation en couches
@@ -549,7 +550,7 @@ Le domaine (Core) ne dépend pas de la présentation (WebSite), ce qui permet de
 #### Fichiers concernés
 
 - `/ContactManager.Core/Domain/` - Entités et validateurs métier
-- `/ContactManager.WebSite/Utilities/DomainAsserts.cs` - Assertions métier
+- `/ContactManager.WebSite/Authorization/` - Policy + filter d'ownership
 - Structure de projets Core vs WebSite - Séparation en couches
 
 #### Pourquoi c'est important?
@@ -651,10 +652,7 @@ contact-manager/
 │   │   │   ├── Contact.cs            # Entité contact
 │   │   │   └── Address.cs            # Entité adresse
 │   │   └── Validators/
-│   │       ├── ContactPropertyValidators.cs
-│   │       ├── AddressPropertyValidators.cs
-│   │       ├── IdentityValidators.cs
-│   │       └── CommonValidationRules.cs
+│   │       └── PropertyValidators.cs
 │   ├── Data/
 │   │   └── SeedExtension.cs          # Initialisation des données
 │   ├── Migrations/                   # Migrations EF Core
@@ -677,8 +675,8 @@ contact-manager/
 │   │   ├── Address/
 │   │   ├── Home/
 │   │   └── Shared/
+│   ├── Authorization/                # Policy + filter d'ownership
 │   ├── Utilities/
-│   │   ├── DomainAsserts.cs          # Assertions métier
 │   │   └── PasswordGenerator.cs
 │   ├── wwwroot/                      # Fichiers statiques
 │   ├── appsettings.json              # Configuration
@@ -780,8 +778,8 @@ Ce compte contient un contact de test (Sébastien Pouliot) avec une adresse au C
 Vous pouvez également créer un nouveau compte en utilisant la page d'inscription :
 
 1. Cliquez sur "Register" dans le menu
-2. Entrez un nom d'utilisateur (minimum 3 caractères)
-3. Créez un mot de passe sécurisé
+2. Entrez un nom d'utilisateur (minimum 6 caractères)
+3. Créez un mot de passe sécurisé (8+ caractères, majuscule, minuscule, chiffre, caractère spécial)
 4. Confirmez le mot de passe
 5. Cliquez sur "Register"
 

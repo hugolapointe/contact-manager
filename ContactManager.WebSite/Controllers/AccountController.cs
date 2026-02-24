@@ -9,49 +9,48 @@ namespace ContactManager.WebSite.Controllers;
 
 [Authorize]
 public class AccountController(
-    UserManager<User> userManager,
-    SignInManager<User> signInManager) : Controller {
-    private readonly UserManager<User> userManager = userManager;
-    private readonly SignInManager<User> signInManager = signInManager;
+    UserManager<AppUser> userManager,
+    SignInManager<AppUser> signInManager) : Controller {
+    private readonly UserManager<AppUser> _userManager = userManager;
+    private readonly SignInManager<AppUser> _signInManager = signInManager;
 
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult LogIn(string? returnUrl = null) {
-
-        ViewBag.ReturnUrl = returnUrl;
-        return View();
+    public IActionResult Login(string? returnUrl = null) {
+        return View(new Login {
+            ReturnUrl = returnUrl
+        });
     }
 
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> LogIn(LogIn vm, string? returnUrl = null) {
+    public async Task<IActionResult> Login(Login viewModel, string? returnUrl = null) {
+        viewModel.ReturnUrl = returnUrl ?? viewModel.ReturnUrl;
+
         if (!ModelState.IsValid) {
-            ViewBag.ReturnUrl = returnUrl;
-            return View(vm);
+            return View(viewModel);
         }
 
-        var result = await signInManager.PasswordSignInAsync(
-            vm.UserName, vm.Password, isPersistent: vm.RememberMe, lockoutOnFailure: false);
+        var signInResult = await _signInManager.PasswordSignInAsync(
+            viewModel.UserName, viewModel.Password, isPersistent: viewModel.RememberMe, lockoutOnFailure: false);
 
-        if (!result.Succeeded) {
-            if (result.IsNotAllowed) {
+        if (!signInResult.Succeeded) {
+            if (signInResult.IsNotAllowed) {
                 ModelState.AddModelError(string.Empty, "You are not allowed to log in.");
-            } else if (result.IsLockedOut) {
+            } else if (signInResult.IsLockedOut) {
                 ModelState.AddModelError(string.Empty, "Your account is locked out.");
             } else {
-                ModelState.AddModelError(string.Empty, "Invalid login failed.");
+                ModelState.AddModelError(string.Empty, "Invalid username or password.");
             }
-
-            ViewBag.ReturnUrl = returnUrl;
-            return View(vm);
+            return View(viewModel);
         }
 
-        if (string.IsNullOrEmpty(returnUrl) || !Url.IsLocalUrl(returnUrl)) {
+        if (string.IsNullOrEmpty(viewModel.ReturnUrl) || !Url.IsLocalUrl(viewModel.ReturnUrl)) {
             return RedirectToAction("Index", "Home");
         }
 
-        return LocalRedirect(returnUrl);
+        return LocalRedirect(viewModel.ReturnUrl);
     }
 
     [HttpGet]
@@ -62,26 +61,23 @@ public class AccountController(
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(Register vm) {
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Register(Register viewModel) {
         if (!ModelState.IsValid) {
-            return View(vm);
+            return View(viewModel);
         }
 
-        try {
-            var newUser = new User(vm.UserName);
-            var result = await userManager.CreateAsync(newUser, vm.Password);
+        var userToCreate = AppUser.Create(viewModel.UserName);
+        var createResult = await _userManager.CreateAsync(userToCreate, viewModel.Password);
 
-            if (!result.Succeeded) {
-                ModelState.AddModelError(string.Empty, "Unable to register a new user.");
-                return View(vm);
+        if (!createResult.Succeeded) {
+            foreach (var error in createResult.Errors) {
+                ModelState.AddModelError(string.Empty, error.Description);
             }
-
-            await signInManager.SignInAsync(newUser, true);
-
-        } catch {
-            ModelState.AddModelError(string.Empty, "Something went wrong. Please try again.");
-            return View(vm);
+            return View(viewModel);
         }
+
+        await _signInManager.SignInAsync(userToCreate, true);
 
         return RedirectToAction("Manage", "Contact");
     }
@@ -89,7 +85,7 @@ public class AccountController(
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> LogOut() {
-        await signInManager.SignOutAsync();
+        await _signInManager.SignOutAsync();
 
         return RedirectToAction("Index", "Home");
     }

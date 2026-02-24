@@ -13,8 +13,9 @@ public class ContactCreate {
     [Display(Name = "Last Name")]
     public string? LastName { get; set; }
 
-    [Display(Name = "Date Of Birth")]
+    [Display(Name = "Date of Birth")]
     [DataType(DataType.Date)]
+    [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime? DateOfBirth { get; set; }
 
     [Display(Name = "Street Number")]
@@ -29,7 +30,7 @@ public class ContactCreate {
     [Display(Name = "Postal Code")]
     public string? Address_PostalCode { get; set; }
 
-    [Display(Name = "Terms Accepted?")]
+    [Display(Name = "Accept terms and conditions")]
     public bool TermsAccepted { get; set; } = false;
 
     public class Validator : AbstractValidator<ContactCreate> {
@@ -71,7 +72,7 @@ public class ContactCreate {
 
             RuleFor(vm => vm.TermsAccepted)
                 .Must(terms => terms == true)
-                    .WithMessage("Make sure your contact accept the terms.");
+                    .WithMessage("Please accept the terms and conditions.");
         }
     }
 }

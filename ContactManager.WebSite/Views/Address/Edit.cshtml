@@ -8,10 +8,12 @@
 
 <div class="mt-2 mb-2">
     @Html.ActionLink("Back", "Manage",
-    new { contactId = @ViewBag.contactId }, new { @class = "btn btn-secondary" })
+    new { contactId = @Model.ContactId }, new { @class = "btn btn-secondary" })
 </div>
 
-<form asp-action="Edit" asp-route-id="@ViewBag.Id">
+<form method="post" asp-action="Edit" asp-route-id="@Model.AddressId" asp-route-contactId="@Model.ContactId">
+    <input asp-for="AddressId" type="hidden" />
+    <input asp-for="ContactId" type="hidden" />
     <div class="row">
         <div class="col-md-4">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>

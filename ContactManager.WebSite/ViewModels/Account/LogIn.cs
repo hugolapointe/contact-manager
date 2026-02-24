@@ -1,12 +1,11 @@
-﻿using ContactManager.Core.Domain.Validators.Identity;
-
-using FluentValidation;
+﻿using FluentValidation;
 
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ContactManager.WebSite.ViewModels.Account;
 
-public class LogIn {
+public class Login {
     [Display(Name = "Username")]
     public string? UserName { get; set; }
 
@@ -17,13 +16,19 @@ public class LogIn {
     [Display(Name = "Remember Me?")]
     public bool RememberMe { get; set; } = false;
 
-    public class Validator : AbstractValidator<LogIn> {
+    [HiddenInput(DisplayValue = false)]
+    [Editable(false)]
+    public string? ReturnUrl { get; set; }
+
+    public class Validator : AbstractValidator<Login> {
         public Validator() {
             RuleFor(x => x.UserName)
-                .SetValidator(new UsernameValidator());
+                .NotEmpty()
+                .WithMessage("Please provide your username.");
 
             RuleFor(vm => vm.Password)
-                .SetValidator(new PasswordValidator());
+                .NotEmpty()
+                .WithMessage("Please provide your password.");
         }
     }
 }

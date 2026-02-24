@@ -11,7 +11,8 @@
     new {}, new { @class = "btn btn-secondary" })
 </div>
 
-<form asp-action="Edit" asp-route-id="@ViewBag.Id">
+<form method="post" asp-action="Edit" asp-route-id="@Model.ContactId">
+    <input asp-for="ContactId" type="hidden" />
     <div class="row">
         <div class="col-md-4">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -27,7 +28,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="DateOfBirth" class="control-label"></label>
-                <input asp-for="DateOfBirth" class="form-control" />
+                <input asp-for="DateOfBirth" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" />
                 <span asp-validation-for="DateOfBirth" class="text-danger"></span>
             </div>
             <div class="form-group mt-2 mb-2">
