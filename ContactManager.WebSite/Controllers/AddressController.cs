@@ -57,7 +57,7 @@ public class AddressController(ContactManagerContext context) : Controller {
 
         var contact = HttpContext.GetResourceOwned<Contact>();
 
-        var addressToCreate = Address.CreateForContact(
+        var addressToCreate = Address.Create(
             contact.Id,
             viewModel.StreetNumber!.Value,
             viewModel.StreetName!,

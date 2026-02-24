@@ -16,7 +16,7 @@ public class ContactController(ContactManagerContext context) : Controller {
 
     [HttpGet]
     public async Task<IActionResult> Manage() {
-        var currentUserId = this.GetUserId();
+        var currentUserId = this.GetRequiredUserId();
 
         var contactItems = await _context.Contacts
             .AsNoTracking()
@@ -44,22 +44,23 @@ public class ContactController(ContactManagerContext context) : Controller {
             return View(viewModel);
         }
 
-        var currentUserId = this.GetUserId();
+        var currentUserId = this.GetRequiredUserId();
 
-        var contactToCreate = Contact.CreateForOwner(
+        var contactToCreate = Contact.Create(
             currentUserId,
             viewModel.FirstName!,
             viewModel.LastName!,
             viewModel.DateOfBirth!.Value);
+        await _context.Contacts.AddAsync(contactToCreate);
 
-        var defaultAddress = Address.CreateDefault(
+        var defaultAddress = Address.Create(
+            contactToCreate.Id,
             viewModel.Address_StreetNumber!.Value,
             viewModel.Address_StreetName!,
             viewModel.Address_CityName!,
             viewModel.Address_PostalCode!);
 
         contactToCreate.Addresses.Add(defaultAddress);
-        _context.Contacts.Add(contactToCreate);
         await _context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Manage));

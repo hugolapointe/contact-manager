@@ -36,38 +36,24 @@ public class ContactCreate {
     public class Validator : AbstractValidator<ContactCreate> {
         public Validator() {
             RuleFor(vm => vm.FirstName)
-                .NotNull()
-                    .WithMessage("Please provide a first name.")
                 .SetValidator(new FirstNameValidator());
 
             RuleFor(vm => vm.LastName)
-                .NotNull()
-                    .WithMessage("Please provide a last name.")
                 .SetValidator(new LastNameValidator());
 
             RuleFor(vm => vm.DateOfBirth)
-                .NotNull()
-                    .WithMessage("Please provide a date of birth.")
                 .SetValidator(new BirthDateValidator());
 
             RuleFor(vm => vm.Address_StreetNumber)
-                .NotNull()
-                    .WithMessage("Please provide a street number.")
                 .SetValidator(new StreetNumberValidator());
 
             RuleFor(vm => vm.Address_StreetName)
-                .NotNull()
-                    .WithMessage("Please provide a street name.")
                 .SetValidator(new StreetNameValidator());
 
             RuleFor(vm => vm.Address_CityName)
-                .NotNull()
-                    .WithMessage("Please provide a city name.")
                 .SetValidator(new CityNameValidator());
 
             RuleFor(vm => vm.Address_PostalCode)
-                .NotNull()
-                    .WithMessage("Please provide a postal code.")
                 .SetValidator(new PostalCodeValidator());
 
             RuleFor(vm => vm.TermsAccepted)

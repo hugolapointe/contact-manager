@@ -31,13 +31,13 @@ public class Register {
 
             RuleFor(vm => vm.PasswordConfirmation)
                 .NotEmpty()
-                    .WithMessage("Please confirm your password.")
+                    .WithMessage("Please confirm the password.")
                 .Equal(vm => vm.Password)
                     .WithMessage("The password and confirmation password do not match.");
 
             RuleFor(vm => vm.TermsAccepted)
                 .Must(terms => terms == true)
-                    .WithMessage("You must accept the Terms.");
+                    .WithMessage("Please accept the terms and conditions.");
         }
     }
 }

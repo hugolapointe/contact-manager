@@ -87,7 +87,7 @@ public class UserController(
             return View(viewModel);
         }
 
-        var userToCreate = AppUser.Create(viewModel.UserName);
+        var userToCreate = AppUser.CreateForUserName(viewModel.UserName);
         var createResult = await _userManager.CreateAsync(userToCreate, viewModel.Password);
 
         if (!createResult.Succeeded) {

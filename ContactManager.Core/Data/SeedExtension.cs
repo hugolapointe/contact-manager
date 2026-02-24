@@ -38,7 +38,7 @@ public static class SeedExtension {
         }
 
         AppUser addUser(string userName, string password) {
-            var newUser = AppUser.Create(userName);
+            var newUser = AppUser.CreateForUserName(userName);
             newUser.Id = Guid.NewGuid();
             newUser.NormalizedUserName = userName.ToUpper();
             newUser.SecurityStamp = Guid.NewGuid().ToString();

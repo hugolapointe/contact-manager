@@ -31,16 +31,16 @@ public class FirstNameValidator : AbstractValidator<string?> {
         RuleFor(firstName => firstName)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithMessage("Please provide a First Name.")
+            .WithMessage("Please provide a first name.")
             .Must(firstName => {
                 var trimmed = firstName!.Trim();
                 return trimmed.Length >= FIRST_NAME_LENGTH_MIN && trimmed.Length <= FIRST_NAME_LENGTH_MAX;
             })
-            .WithMessage($"Please provide a First Name between {FIRST_NAME_LENGTH_MIN} and {FIRST_NAME_LENGTH_MAX} characters.")
+            .WithMessage($"Please provide a first name between {FIRST_NAME_LENGTH_MIN} and {FIRST_NAME_LENGTH_MAX} characters.")
             .Must(firstName => firstName!.Trim() == firstName)
-            .WithMessage("Please remove leading and trailing spaces from First Name.")
+            .WithMessage("Please remove leading and trailing spaces from first name.")
             .IsValidPersonName()
-            .WithMessage("Please provide a First Name that contains only letters.");
+            .WithMessage("Please provide a first name that contains only letters.");
     }
 }
 
@@ -52,16 +52,16 @@ public class LastNameValidator : AbstractValidator<string?> {
         RuleFor(lastName => lastName)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithMessage("Please provide a Last Name.")
+            .WithMessage("Please provide a last name.")
             .Must(lastName => {
                 var trimmed = lastName!.Trim();
                 return trimmed.Length >= LAST_NAME_LENGTH_MIN && trimmed.Length <= LAST_NAME_LENGTH_MAX;
             })
-            .WithMessage($"Please provide a Last Name between {LAST_NAME_LENGTH_MIN} and {LAST_NAME_LENGTH_MAX} characters.")
+            .WithMessage($"Please provide a last name between {LAST_NAME_LENGTH_MIN} and {LAST_NAME_LENGTH_MAX} characters.")
             .Must(lastName => lastName!.Trim() == lastName)
-            .WithMessage("Please remove leading and trailing spaces from Last Name.")
+            .WithMessage("Please remove leading and trailing spaces from last name.")
             .IsValidPersonName()
-            .WithMessage("Please provide a Last Name that contains only letters.");
+            .WithMessage("Please provide a last name that contains only letters.");
     }
 }
 
@@ -69,9 +69,9 @@ public class BirthDateValidator : AbstractValidator<DateTime?> {
     public BirthDateValidator() {
         RuleFor(birthDate => birthDate)
             .NotEmpty()
-            .WithMessage("Please provide a Birth Date.")
+            .WithMessage("Please provide a birth date.")
             .LessThan(DateTime.Today)
-            .WithMessage("Please provide a valid Birth Date in the past.");
+            .WithMessage("Please provide a valid birth date in the past.");
     }
 }
 
@@ -79,9 +79,9 @@ public class StreetNumberValidator : AbstractValidator<int?> {
     public StreetNumberValidator() {
         RuleFor(streetNumber => streetNumber)
             .NotEmpty()
-            .WithMessage("Please provide a Street Number.")
+            .WithMessage("Please provide a street number.")
             .GreaterThan(0)
-            .WithMessage("Please provide a positive Street Number.");
+            .WithMessage("Please provide a positive street number.");
     }
 }
 
@@ -93,16 +93,16 @@ public class StreetNameValidator : AbstractValidator<string?> {
         RuleFor(streetName => streetName)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithMessage("Please provide a Street Name.")
+            .WithMessage("Please provide a street name.")
             .Must(streetName => {
                 var trimmed = streetName!.Trim();
                 return trimmed.Length >= STREET_NAME_LENGTH_MIN && trimmed.Length <= STREET_NAME_LENGTH_MAX;
             })
-            .WithMessage($"Please provide a Street Name between {STREET_NAME_LENGTH_MIN} and {STREET_NAME_LENGTH_MAX} characters.")
+            .WithMessage($"Please provide a street name between {STREET_NAME_LENGTH_MIN} and {STREET_NAME_LENGTH_MAX} characters.")
             .Must(streetName => streetName!.Trim() == streetName)
-            .WithMessage("Please remove leading and trailing spaces from Street Name.")
+            .WithMessage("Please remove leading and trailing spaces from street name.")
             .IsValidStreetName()
-            .WithMessage("Please provide a Street Name that contains only valid characters.");
+            .WithMessage("Please provide a street name that contains only valid characters.");
     }
 }
 
@@ -114,16 +114,16 @@ public class CityNameValidator : AbstractValidator<string?> {
         RuleFor(cityName => cityName)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithMessage("Please provide a City Name.")
+            .WithMessage("Please provide a city name.")
             .Must(cityName => {
                 var trimmed = cityName!.Trim();
                 return trimmed.Length >= CITY_NAME_LENGTH_MIN && trimmed.Length <= CITY_NAME_LENGTH_MAX;
             })
-            .WithMessage($"Please provide a City Name between {CITY_NAME_LENGTH_MIN} and {CITY_NAME_LENGTH_MAX} characters.")
+            .WithMessage($"Please provide a city name between {CITY_NAME_LENGTH_MIN} and {CITY_NAME_LENGTH_MAX} characters.")
             .Must(cityName => cityName!.Trim() == cityName)
-            .WithMessage("Please remove leading and trailing spaces from City Name.")
+            .WithMessage("Please remove leading and trailing spaces from city name.")
             .IsValidPersonName()
-            .WithMessage("Please provide a City Name that contains only letters and spaces.");
+            .WithMessage("Please provide a city name that contains only letters and spaces.");
     }
 }
 
@@ -135,9 +135,9 @@ public class PostalCodeValidator : AbstractValidator<string?> {
         RuleFor(postalCode => postalCode)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-                .WithMessage("Please provide a Postal Code.")
+                .WithMessage("Please provide a postal code.")
             .Must(postalCode => Regex.IsMatch(postalCode!.Trim().ToUpper(), REGEX_POSTAL_CODE, REGEX_OPTIONS))
-                .WithMessage("Please provide a valid Postal Code.");
+                .WithMessage("Please provide a valid postal code.");
     }
 }
 
@@ -155,11 +155,11 @@ public class UsernameValidator : AbstractValidator<string?> {
         RuleFor(userName => userName)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-                .WithMessage("The UserName cannot be empty.")
+                .WithMessage("The username cannot be empty.")
             .Must(userName => userName!.Trim().Length >= LENGTH_MIN)
-                .WithMessage($"The UserName must have at least {LENGTH_MIN} characters.")
+                .WithMessage($"The username must have at least {LENGTH_MIN} characters.")
             .Must(userName => Regex.IsMatch(userName!.Trim().ToLower(), REGEX_USERNAME, REGEX_OPTIONS))
-                .WithMessage("The UserName contains invalid characters.");
+                .WithMessage("The username contains invalid characters.");
     }
 }
 
@@ -174,19 +174,19 @@ public class PasswordValidator : AbstractValidator<string?> {
     public PasswordValidator() {
         RuleFor(password => password)
             .NotEmpty()
-                .WithMessage("The Password cannot be empty.")
+                .WithMessage("The password cannot be empty.")
             .MinimumLength(LENGTH_MIN)
-                .WithMessage($"The Password must have at least {LENGTH_MIN} characters.")
+                .WithMessage($"The password must have at least {LENGTH_MIN} characters.")
             .Matches(REGEX_UPPERCASE)
-                .WithMessage("The Password must have at least one uppercase letter.")
+                .WithMessage("The password must have at least one uppercase letter.")
             .Matches(REGEX_LOWERCASE)
-                .WithMessage("The Password must have at least one lowercase letter.")
+                .WithMessage("The password must have at least one lowercase letter.")
             .Matches(REGEX_DIGIT)
-                .WithMessage("The Password must have at least one digit.")
+                .WithMessage("The password must have at least one digit.")
             .Matches(REGEX_SPECIAL)
-                .WithMessage("The Password must have at least one special character.")
+                .WithMessage("The password must have at least one special character.")
             .Matches(REGEX_NOT_SPACE)
-                .WithMessage("The Password cannot contain spaces.");
+                .WithMessage("The password cannot contain spaces.");
     }
 }
 
