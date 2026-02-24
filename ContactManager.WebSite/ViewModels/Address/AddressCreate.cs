@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ContactManager.WebSite.ViewModels.Address;
 
-public class AddressCreate : IAddressInput {
+public class AddressCreate {
     [HiddenInput(DisplayValue = false)]
     [Editable(false)]
     public Guid ContactId { get; set; }
@@ -26,7 +26,25 @@ public class AddressCreate : IAddressInput {
 
     public class Validator : AbstractValidator<AddressCreate> {
         public Validator() {
-            this.ApplyAddressRules();
+            RuleFor(vm => vm.StreetNumber)
+                .NotNull()
+                    .WithMessage("Please provide a street number.")
+                .SetValidator(new StreetNumberValidator());
+
+            RuleFor(vm => vm.StreetName)
+                .NotNull()
+                    .WithMessage("Please provide a street name.")
+                .SetValidator(new StreetNameValidator());
+
+            RuleFor(vm => vm.CityName)
+                .NotNull()
+                    .WithMessage("Please provide a city name.")
+                .SetValidator(new CityNameValidator());
+
+            RuleFor(vm => vm.PostalCode)
+                .NotNull()
+                    .WithMessage("Please provide a postal code.")
+                .SetValidator(new PostalCodeValidator());
         }
     }
 }

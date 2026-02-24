@@ -5,7 +5,7 @@ using System.Security.Claims;
 namespace ContactManager.WebSite.Utilities;
 
 public static class ControllerBaseExtensions {
-    public static Guid GetRequiredUserId(this ControllerBase controller) {
+    public static Guid GetUserId(this ControllerBase controller) {
         var userIdRaw = controller.User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (Guid.TryParse(userIdRaw, out var userId)) {
             return userId;

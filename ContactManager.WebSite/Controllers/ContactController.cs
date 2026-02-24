@@ -16,7 +16,7 @@ public class ContactController(ContactManagerContext context) : Controller {
 
     [HttpGet]
     public async Task<IActionResult> Manage() {
-        var currentUserId = this.GetRequiredUserId();
+        var currentUserId = this.GetUserId();
 
         var contactItems = await _context.Contacts
             .AsNoTracking()
@@ -44,7 +44,7 @@ public class ContactController(ContactManagerContext context) : Controller {
             return View(viewModel);
         }
 
-        var currentUserId = this.GetRequiredUserId();
+        var currentUserId = this.GetUserId();
 
         var contactToCreate = Contact.CreateForOwner(
             currentUserId,

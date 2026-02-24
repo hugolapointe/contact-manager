@@ -1,7 +1,6 @@
 namespace ContactManager.Core.Domain.Entities;
 
-public class Address {
-    public Guid Id { get; private set; }
+public class Address : BaseEntity {
     public int StreetNumber { get; private set; }
     public string StreetName { get; private set; }
     public string CityName { get; private set; }

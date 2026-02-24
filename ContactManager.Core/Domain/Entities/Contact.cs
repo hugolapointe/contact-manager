@@ -1,7 +1,6 @@
 namespace ContactManager.Core.Domain.Entities;
 
-public class Contact : IOwnedEntity {
-    public Guid Id { get; private set; }
+public class Contact : BaseEntity, IOwnedEntity {
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
     public DateTime DateOfBirth { get; private set; }
