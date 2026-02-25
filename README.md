@@ -6,6 +6,7 @@
 ![Identity](https://img.shields.io/badge/ASP.NET%20Core-Identity-0A66C2)
 ![FluentValidation](https://img.shields.io/badge/Validation-FluentValidation-1F7A8C)
 
+
 Projet éducatif pour présenter les notions de base de **ASP.NET Core MVC**, **ASP.NET Core Identity** et **FluentValidation**, dans un contexte simple de gestion de contacts.
 
 ## Objectif pédagogique
@@ -19,9 +20,10 @@ Ce projet montre comment:
 ## Structure du projet
 
 - `ContactManager.Core/`
-  - `Domain/Entities/`: entités métier (`AppUser`, `Contact`, `Address`)
-  - `Domain/Guards/` et `Domain/Validators/`: invariants et règles de validation
-  - `Data/SeedExtension.cs`: données de démarrage (rôles, utilisateur, contact/adresse)
+  - `Domain/Entities/`: entités métier (`AppUser`, `Contact`, `Address`, `AppRole`)
+  - `Domain/Validators/`: règles de validation
+  - `BaseEntity` et `IAudible` : gestion automatique des dates de création et de modification
+  - `Data/RuntimeSeed.cs`: données de démarrage injectées au runtime (rôles, utilisateur, contact/adresse)
   - `ContactManagerContext.cs`: configuration EF Core et relations
 - `ContactManager.WebSite/`
   - `Controllers/`: cas d’utilisation MVC
@@ -30,11 +32,13 @@ Ce projet montre comment:
   - `Authorization/`: filtre de contrôle de propriété des ressources
   - `Program.cs`: configuration DI, Identity, EF Core et pipeline HTTP
 
+
 ## Domaine
 
 | Entité | Rôle | Relations principales |
 |---|---|---|
 | `AppUser` | Utilisateur de l’application (Identity) | 1 utilisateur possède plusieurs `Contact` |
+| `AppRole` | Rôle métier de l’application | Hérite d’IdentityRole, utilisé pour l’authentification |
 | `Contact` | Contact appartenant à un utilisateur | appartient à `AppUser`, possède plusieurs `Address` |
 | `Address` | Adresse d’un contact | appartient à `Contact` |
 
@@ -77,18 +81,52 @@ Actions principales offertes par l’application.
 
 - Modifier et supprimer uniquement ses propres contacts et adresses grâce au contrôle de propriété `ResourceOwner`.
 
-## Décisions conceptuelles importantes
+## Comptes de test
 
-- **Autorisation personnalisée de propriété de ressource**: un composant dédié (`ResourceOwnerFilter`) est branché dans le pipeline MVC via l’attribut `ResourceOwner`, charge la ressource, valide l’ownership, puis la stocke dans `HttpContext`.
-- **Séparation des responsabilités (Core vs WebSite)**: le domaine et la persistance sont isolés de la couche présentation.
-- **Invariants métier au niveau domaine**: règles critiques appliquées dans les entités/guards pour éviter des états invalides.
-- **Validation d’entrée au niveau MVC**: FluentValidation est utilisé pour les ViewModels.
-- **Intégration Identity native**: authentification/autorisation standard via ASP.NET Core Identity avec `AppUser`.
-- **Propriétés calculées non persistées**: `Age` et `FullName` sont explicitement exclues du mapping EF Core (`[NotMapped]`).
+Données seedées dynamiquement au runtime dans `ContactManager.Core/Data/RuntimeSeed.cs` :
+- **Nom d’utilisateur**: `hlapointe` / **Mot de passe**: `Admin123!` / **Rôle**: `Administrator`
+- **Nom d’utilisateur**: `mbouchard` / **Mot de passe**: `User123!A` / **Rôle**: `User`
 
-## Compte de test
+## Guide de démarrage rapide
 
-Données seedées dans `ContactManager.Core/Data/SeedExtension.cs`:
-- **Nom d’utilisateur**: `hlapointe`
-- **Mot de passe**: `Admin123!`
-- **Rôle**: `Administrator`
+1. **Configurer la base de données** :
+  - Vérifiez la chaîne de connexion dans `ContactManager.WebSite/appsettings.json` (clé `DefaultConnection`).
+2. **Appliquer les migrations EF Core** :
+  - Ouvrez un terminal à la racine de la solution.
+  - Exécutez :
+    ```
+    dotnet ef database update -p ContactManager.Core/ContactManager.Core.csproj -s ContactManager.WebSite/ContactManager.WebSite.csproj -c ContactManagerContext
+    ```
+    (Le paramètre `-p` indique le projet contenant les migrations, `-s` le projet de démarrage, et `-c` le contexte.)
+3. **Lancer l’application** :
+  - Démarrez le projet `ContactManager.WebSite`.
+  - Connectez-vous avec un des comptes de test ci-dessus.
+
+---
+
+## Notions et patterns démontrés
+
+### Architecture et séparation des responsabilités
+- **Séparation stricte** entre la couche domaine/persistance (`ContactManager.Core`) et la couche présentation MVC (`ContactManager.WebSite`).
+- **Entités métier** (`AppUser`, `Contact`, `Address`, `AppRole`) : encapsulent la logique métier et les règles d’intégrité.
+- **Seed runtime** : les données de test sont injectées dynamiquement au démarrage (voir `RuntimeSeed.cs`).
+
+### Validation et ViewModels
+- **Validation côté serveur** : chaque ViewModel possède un validateur FluentValidation dédié (ex : `ContactCreate.Validator`).
+- **Affichage des erreurs** : les erreurs de validation sont affichées dans les vues Razor via le ModelState.
+
+### Authentification et autorisation
+- **ASP.NET Core Identity** : gestion des utilisateurs (`AppUser`) et des rôles personnalisés (`AppRole`).
+- **Filtre d’autorisation personnalisé** : l’attribut `[ResourceOwner]` garantit qu’un utilisateur ne peut modifier que ses propres contacts/adresses (pattern d’ownership).
+
+### Pattern POST/Redirect/GET (PRG) et feedback utilisateur
+- **PRG** : après une action POST (création, édition, suppression), l’utilisateur est redirigé (RedirectToAction) pour éviter la double soumission de formulaire.
+- **Messages flash** : les messages d’erreur ou de succès sont stockés dans `TempData` et affichés via la vue partielle `_RequestFeedbackAlerts.cshtml`.
+  - Utilisation des méthodes d’extension `SetErrorMessage` et `SetSuccessMessage` dans les contrôleurs.
+
+### Audit automatique
+- **Timestamps** : toutes les entités héritent de `BaseEntity` qui gère automatiquement les dates de création (`CreatedAt`) et de modification (`UpdateAt`).
+
+### Bonnes pratiques démontrées
+- **Propriétés calculées non persistées** : propriétés comme `Age` et `FullName` sont décorées avec `[NotMapped]` pour ne pas être stockées en base.
+- **Utilisation de partials Razor** : pour la réutilisation de l’affichage des messages de feedback.
