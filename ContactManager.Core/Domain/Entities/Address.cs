@@ -1,5 +1,3 @@
-using ContactManager.Core.Domain.Guards;
-
 namespace ContactManager.Core.Domain.Entities;
 
 public class Address : BaseEntity {
@@ -19,8 +17,8 @@ public class Address : BaseEntity {
 
     // ===== Méthodes métier =====
     public static Address Create(Guid contactId, int streetNumber, string streetName, string cityName, string postalCode) {
-        Guard.AgainstEmptyGuid(contactId, nameof(contactId), "Contact ID cannot be empty.");
-        ArgumentOutOfRangeException.ThrowIfLessThan(streetNumber, 1, nameof(streetNumber));
+        ArgumentOutOfRangeException.ThrowIfEqual(contactId, Guid.Empty);
+        ArgumentOutOfRangeException.ThrowIfLessThan(streetNumber, 1);
         ArgumentException.ThrowIfNullOrWhiteSpace(streetName);
         ArgumentException.ThrowIfNullOrWhiteSpace(cityName);
         ArgumentException.ThrowIfNullOrWhiteSpace(postalCode);
@@ -36,7 +34,7 @@ public class Address : BaseEntity {
     }
 
     public void Update(int streetNumber, string streetName, string cityName, string postalCode) {
-        ArgumentOutOfRangeException.ThrowIfLessThan(streetNumber, 1, nameof(streetNumber));
+        ArgumentOutOfRangeException.ThrowIfLessThan(streetNumber, 1);
         ArgumentException.ThrowIfNullOrWhiteSpace(streetName);
         ArgumentException.ThrowIfNullOrWhiteSpace(cityName);
         ArgumentException.ThrowIfNullOrWhiteSpace(postalCode);
@@ -45,5 +43,7 @@ public class Address : BaseEntity {
         StreetName = streetName;
         CityName = cityName;
         PostalCode = postalCode;
+
+        Update();
     }
 }

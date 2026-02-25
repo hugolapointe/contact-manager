@@ -1,4 +1,5 @@
 ﻿using ContactManager.Core.Domain.Entities;
+using ContactManager.WebSite.Utilities;
 using ContactManager.WebSite.ViewModels.Account;
 
 using Microsoft.AspNetCore.Authorization;
@@ -37,17 +38,16 @@ public class AccountController(
 
         if (!signInResult.Succeeded) {
             if (signInResult.IsNotAllowed) {
-                ModelState.AddModelError(string.Empty, "You are not allowed to log in.");
+                return this.ViewWithError(viewModel, "You are not allowed to log in.");
             } else if (signInResult.IsLockedOut) {
-                ModelState.AddModelError(string.Empty, "Your account is locked out.");
+                return this.ViewWithError(viewModel, "Your account is locked out.");
             } else {
-                ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                return this.ViewWithError(viewModel, "Invalid username or password.");
             }
-            return View(viewModel);
         }
 
         if (string.IsNullOrEmpty(viewModel.ReturnUrl) || !Url.IsLocalUrl(viewModel.ReturnUrl)) {
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
         return LocalRedirect(viewModel.ReturnUrl);
@@ -67,19 +67,16 @@ public class AccountController(
             return View(viewModel);
         }
 
-        var userToCreate = AppUser.CreateForUserName(viewModel.UserName);
+        var userToCreate = AppUser.Create(viewModel.UserName, AppRole.UserName);
         var createResult = await _userManager.CreateAsync(userToCreate, viewModel.Password);
 
         if (!createResult.Succeeded) {
-            foreach (var error in createResult.Errors) {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-            return View(viewModel);
+            return this.ViewWithErrors(viewModel, createResult.Errors.Select(error => error.Description));
         }
 
         await _signInManager.SignInAsync(userToCreate, true);
 
-        return RedirectToAction("Manage", "Contact");
+        return RedirectToAction(nameof(ContactController.Manage), "Contact");
     }
 
     [HttpPost]
@@ -87,6 +84,6 @@ public class AccountController(
     public async Task<IActionResult> LogOut() {
         await _signInManager.SignOutAsync();
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction(nameof(HomeController.Index), "Home");
     }
 }

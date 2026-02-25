@@ -1,7 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using ContactManager.Core.Domain.Entities
 
 @model UserCreate
-@inject RoleManager<IdentityRole<Guid>> roleManager
+@inject RoleManager<AppRole> roleManager
 
 @{
     ViewData["Title"] = "User Creation";

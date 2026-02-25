@@ -27,6 +27,8 @@ public class AddressController(ContactManagerContext context) : Controller {
                 StreetName = address.StreetName,
                 City = address.CityName,
                 PostalCode = address.PostalCode,
+                CreatedAt = address.CreatedAt,
+                UpdateAt = address.UpdateAt,
             })
             .ToListAsync();
 

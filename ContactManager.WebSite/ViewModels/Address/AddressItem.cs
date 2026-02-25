@@ -19,4 +19,10 @@ public class AddressItem {
 
     [Display(Name = "Postal Code")]
     public string PostalCode { get; set; } = string.Empty;
+
+    [Display(Name = "Created At")]
+    public DateTime CreatedAt { get; set; }
+
+    [Display(Name = "Updated At")]
+    public DateTime UpdateAt { get; set; }
 }

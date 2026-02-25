@@ -41,9 +41,9 @@ public class ResourceOwnerFilter(string routeParameter, ContactManagerContext co
 public static class ResourceOwnedExtensions {
     private const string Key = "ResourceOwned";
 
-    internal static void SetResourceOwned(this HttpContext context, IOwnedEntity entity)
+    internal static void SetResourceOwned(this HttpContext context, IOwned entity)
         => context.Items[Key] = entity;
 
-    public static T GetResourceOwned<T>(this HttpContext context) where T : class, IOwnedEntity
+    public static T GetResourceOwned<T>(this HttpContext context) where T : class, IOwned
         => (T)context.Items[Key]!;
 }

@@ -21,11 +21,14 @@ public class ContactController(ContactManagerContext context) : Controller {
         var contactItems = await _context.Contacts
             .AsNoTracking()
             .Where(contact => contact.OwnerId == currentUserId)
+            .OrderBy(contact => contact.LastName)
+            .ThenBy(contact => contact.FirstName)
             .Select(contact => new ContactItem() {
                 Id = contact.Id,
-                FirstName = contact.FirstName,
-                LastName = contact.LastName,
+                FullName = contact.FullName,
                 Age = contact.Age,
+                CreatedAt = contact.CreatedAt,
+                UpdateAt = contact.UpdateAt,
             })
             .ToListAsync();
 

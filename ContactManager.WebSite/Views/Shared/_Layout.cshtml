@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-@using ContactManager.Core.Domain.Enums
+@using ContactManager.Core.Domain.Entities
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -30,7 +30,7 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Contact" asp-action="Manage">Contacts</a>
                         </li>
-                        @if (User?.IsInRole(Roles.Administrator) ?? false) {
+                        @if (User?.IsInRole(AppRole.AdministratorName) ?? false) {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="User" asp-action="Manage">Users</a>
                             </li>
@@ -49,6 +49,7 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            <partial name="_RequestFeedbackAlerts" />
             @RenderBody()
         </main>
     </div>

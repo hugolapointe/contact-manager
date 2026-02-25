@@ -1,6 +1,4 @@
-using ContactManager.Core;
 using ContactManager.Core.Domain.Entities;
-using ContactManager.Core.Domain.Enums;
 using ContactManager.WebSite.Utilities;
 using ContactManager.WebSite.ViewModels.User;
 
@@ -11,55 +9,31 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContactManager.WebSite.Controllers;
 
-[Authorize(Roles = Roles.Administrator)]
+[Authorize(Roles = AppRole.AdministratorName)]
 public class UserController(
-    ContactManagerContext context,
     UserManager<AppUser> userManager,
-    RoleManager<IdentityRole<Guid>> roleManager) : Controller {
-    private readonly ContactManagerContext _context = context;
+    RoleManager<AppRole> roleManager) : Controller {
     private readonly UserManager<AppUser> _userManager = userManager;
-    private readonly RoleManager<IdentityRole<Guid>> _roleManager = roleManager;
+    private readonly RoleManager<AppRole> _roleManager = roleManager;
 
     [HttpGet]
     public async Task<IActionResult> Manage() {
         var users = await _userManager.Users
             .AsNoTracking()
+            .OrderBy(user => user.UserName)
             .ToListAsync();
 
-        var userIds = users.Select(user => user.Id).ToList();
+        var userItems = new List<UserItem>(users.Count);
 
-        var userRoles = await _context.Set<IdentityUserRole<Guid>>()
-            .AsNoTracking()
-            .Where(userRole => userIds.Contains(userRole.UserId))
-            .ToListAsync();
+        foreach (var user in users) {
+            var roleName = (await _userManager.GetRolesAsync(user)).SingleOrDefault();
 
-        var roleIds = userRoles
-            .Select(userRole => userRole.RoleId)
-            .Distinct()
-            .ToList();
-
-        var roleNamesById = await _roleManager.Roles
-            .AsNoTracking()
-            .Where(role => roleIds.Contains(role.Id))
-            .ToDictionaryAsync(role => role.Id, role => role.Name ?? string.Empty);
-
-        var roleNameByUserId = userRoles
-            .GroupBy(userRole => userRole.UserId)
-            .ToDictionary(
-                group => group.Key,
-                group => roleNamesById.TryGetValue(group.First().RoleId, out var roleName)
-                    ? roleName
-                    : string.Empty);
-
-        var userItems = users
-            .Select(user => new UserItem {
+            userItems.Add(new UserItem {
                 Id = user.Id,
                 UserName = user.UserName!.Trim(),
-                RoleName = roleNameByUserId.TryGetValue(user.Id, out var roleName)
-                    ? roleName
-                    : string.Empty,
-            })
-            .ToList();
+                RoleName = roleName ?? "No role",
+            });
+        }
 
         return View(userItems);
     }
@@ -81,29 +55,35 @@ public class UserController(
             return View(viewModel);
         }
 
-        var roleToAssign = await _roleManager.FindByIdAsync(viewModel.RoleId.ToString());
-        if (roleToAssign is null) {
-            ModelState.AddModelError(string.Empty, "Selected role was not found.");
-            return View(viewModel);
+        var role = await _roleManager.FindByIdAsync(viewModel.RoleId.ToString());
+        var roleName = role?.Name;
+
+        if (string.IsNullOrWhiteSpace(roleName)) {
+            return this.ViewWithError(viewModel, "Selected role was not found.");
         }
 
-        var userToCreate = AppUser.CreateForUserName(viewModel.UserName);
+        if (!AppRole.IsSupported(roleName)) {
+            return this.ViewWithError(viewModel, $"Unsupported role {roleName}.");
+        }
+
+        var userToCreate = AppUser.Create(viewModel.UserName, roleName);
         var createResult = await _userManager.CreateAsync(userToCreate, viewModel.Password);
 
         if (!createResult.Succeeded) {
-            foreach (var error in createResult.Errors) {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-            return View(viewModel);
+            return this.ViewWithErrors(viewModel, createResult.Errors.Select(error => error.Description));
         }
 
-        var addToRoleResult = await _userManager.AddToRoleAsync(userToCreate, roleToAssign.Name);
+        var addToRoleResult = await _userManager.AddToRoleAsync(userToCreate, roleName);
 
         if (!addToRoleResult.Succeeded) {
-            ModelState.AddModelError(string.Empty, $"Unable to add the user to the role {roleToAssign.Name}.");
-            return View(viewModel);
+            return this.ViewWithErrors(
+                viewModel,
+                addToRoleResult.Errors
+                    .Select(error => error.Description)
+                    .Append($"Unable to add the user to the role {roleName}."));
         }
 
+        this.SetSuccessMessage($"User '{userToCreate.UserName}' created successfully.");
         return RedirectToAction(nameof(Manage));
     }
 
@@ -112,7 +92,7 @@ public class UserController(
     public async Task<IActionResult> ResetPassword(Guid id) {
         var userToReset = await _userManager.FindByIdAsync(id.ToString());
         if (userToReset is null) {
-            TempData["Error"] = "User was not found.";
+            this.SetErrorMessage("User was not found.");
             return RedirectToAction(nameof(Manage));
         }
 
@@ -123,7 +103,7 @@ public class UserController(
         var resetResult = await _userManager.ResetPasswordAsync(userToReset, resetToken, generatedPassword);
 
         if (!resetResult.Succeeded) {
-            TempData["Error"] = string.Join(" ", resetResult.Errors.Select(error => error.Description));
+            this.SetErrorMessage(string.Join(" ", resetResult.Errors.Select(error => error.Description)));
             return RedirectToAction(nameof(Manage));
         }
 
@@ -136,41 +116,28 @@ public class UserController(
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Remove(Guid id) {
-        var currentUser = await _userManager.GetUserAsync(User);
-        if (currentUser is null) {
-            return Challenge();
-        }
+        var currentUserId = this.GetRequiredUserId();
 
-        if (currentUser.Id == id) {
-            TempData["Error"] = "You cannot remove your own account.";
+        if (currentUserId == id) {
+            this.SetErrorMessage("You cannot remove your own account.");
             return RedirectToAction(nameof(Manage));
         }
 
         var userToRemove = await _userManager.FindByIdAsync(id.ToString());
         if (userToRemove is null) {
-            TempData["Error"] = "User was not found.";
+            this.SetErrorMessage("User was not found.");
             return RedirectToAction(nameof(Manage));
         }
 
         var roles = await _userManager.GetRolesAsync(userToRemove);
-        if (roles.Contains(Roles.Administrator)) {
-            var administratorRoleId = await _roleManager.Roles
-                .AsNoTracking()
-                .Where(role => role.Name == Roles.Administrator)
-                .Select(role => role.Id)
-                .SingleOrDefaultAsync();
+        var isAdministrator = roles.Any(roleName => roleName == AppRole.AdministratorName);
 
-            if (administratorRoleId == Guid.Empty) {
-                TempData["Error"] = "Administrator role was not found.";
-                return RedirectToAction(nameof(Manage));
-            }
-
-            var administratorCount = await _context.Set<IdentityUserRole<Guid>>()
-                .AsNoTracking()
-                .CountAsync(userRole => userRole.RoleId == administratorRoleId);
+        if (isAdministrator) {
+            var administrators = await _userManager.GetUsersInRoleAsync(AppRole.AdministratorName);
+            var administratorCount = administrators.Count;
 
             if (administratorCount <= 1) {
-                TempData["Error"] = "You cannot remove the last administrator.";
+                this.SetErrorMessage("You cannot remove the last administrator.");
                 return RedirectToAction(nameof(Manage));
             }
         }
@@ -178,10 +145,11 @@ public class UserController(
         var deleteResult = await _userManager.DeleteAsync(userToRemove);
 
         if (!deleteResult.Succeeded) {
-            TempData["Error"] = string.Join(" ", deleteResult.Errors.Select(error => error.Description));
+            this.SetErrorMessage(string.Join(" ", deleteResult.Errors.Select(error => error.Description)));
             return RedirectToAction(nameof(Manage));
         }
 
+        this.SetSuccessMessage($"User '{userToRemove.UserName}' removed successfully.");
         return RedirectToAction(nameof(Manage));
     }
 }

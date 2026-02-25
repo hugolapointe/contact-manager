@@ -1,5 +1,5 @@
 namespace ContactManager.Core.Domain.Entities;
 
-public interface IOwnedEntity {
+public interface IOwned {
     Guid OwnerId { get; }
 }

@@ -1,4 +1,5 @@
 using ContactManager.Core;
+using ContactManager.Core.Data;
 using ContactManager.Core.Domain.Entities;
 using ContactManager.WebSite.Authorization;
 
@@ -15,7 +16,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ContactManagerContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options => {
+builder.Services.AddIdentity<AppUser, AppRole>(options => {
         options.Password.RequiredLength = 8;
         options.Password.RequireUppercase = true;
         options.Password.RequireLowercase = true;
@@ -31,6 +32,11 @@ builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment()) {
+    using var scope = app.Services.CreateScope();
+    await RuntimeSeed.SeedAsync(scope.ServiceProvider);
+}
 
 if (!app.Environment.IsDevelopment()) {
     app.UseExceptionHandler("/Home/Error");

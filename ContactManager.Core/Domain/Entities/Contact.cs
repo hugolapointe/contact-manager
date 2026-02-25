@@ -1,9 +1,8 @@
-using ContactManager.Core.Domain.Guards;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContactManager.Core.Domain.Entities;
 
-public class Contact : BaseEntity, IOwnedEntity {
+public class Contact : BaseEntity, IOwned {
     // ===== Propriétés métier =====
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
@@ -33,10 +32,11 @@ public class Contact : BaseEntity, IOwnedEntity {
 
     // ===== Méthodes métier =====
     public static Contact Create(Guid ownerId, string firstName, string lastName, DateTime dateOfBirth) {
-        Guard.AgainstEmptyGuid(ownerId, nameof(ownerId), "Owner ID cannot be empty.");
+        ArgumentOutOfRangeException.ThrowIfEqual(ownerId, Guid.Empty);
         ArgumentException.ThrowIfNullOrWhiteSpace(firstName);
         ArgumentException.ThrowIfNullOrWhiteSpace(lastName);
-        Guard.AgainstInvalidBirthDate(dateOfBirth, nameof(dateOfBirth));
+        ArgumentOutOfRangeException.ThrowIfEqual(dateOfBirth, default);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(dateOfBirth.Date, DateTime.Today, nameof(dateOfBirth));
 
         return new Contact {
             Id = Guid.NewGuid(),
@@ -50,10 +50,13 @@ public class Contact : BaseEntity, IOwnedEntity {
     public void Update(string firstName, string lastName, DateTime dateOfBirth) {
         ArgumentException.ThrowIfNullOrWhiteSpace(firstName);
         ArgumentException.ThrowIfNullOrWhiteSpace(lastName);
-        Guard.AgainstInvalidBirthDate(dateOfBirth, nameof(dateOfBirth));
+        ArgumentOutOfRangeException.ThrowIfEqual(dateOfBirth, default);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(dateOfBirth.Date, DateTime.Today, nameof(dateOfBirth));
 
         FirstName = firstName;
         LastName = lastName;
         DateOfBirth = dateOfBirth;
+        
+        Update();
     }
 }

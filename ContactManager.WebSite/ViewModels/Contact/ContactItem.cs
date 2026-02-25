@@ -8,12 +8,15 @@ public class ContactItem {
     [ScaffoldColumn(false)]
     public Guid Id { get; set; }
 
-    [Display(Name = "First Name")]
-    public string FirstName { get; set; } = string.Empty;
-
-    [Display(Name = "Last Name")]
-    public string LastName { get; set; } = string.Empty;
+    [Display(Name = "Full Name")]
+    public string FullName { get; set; } = string.Empty;
 
     [Display(Name = "Age")]
     public int Age { get; set; }
+
+    [Display(Name = "Created At")]
+    public DateTime CreatedAt { get; set; }
+
+    [Display(Name = "Updated At")]
+    public DateTime UpdateAt { get; set; }
 }

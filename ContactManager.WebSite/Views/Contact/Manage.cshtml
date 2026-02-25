@@ -14,18 +14,20 @@
 <table class="table">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(model => model.FirstName)</th>
-            <th>@Html.DisplayNameFor(model => model.LastName)</th>
+            <th>@Html.DisplayNameFor(model => model.FullName)</th>
             <th>@Html.DisplayNameFor(model => model.Age)</th>
+            <th>@Html.DisplayNameFor(model => model.CreatedAt)</th>
+            <th>@Html.DisplayNameFor(model => model.UpdateAt)</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model) {
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.FirstName)</td>
-                <td>@Html.DisplayFor(modelItem => item.LastName)</td>
+                <td>@Html.DisplayFor(modelItem => item.FullName)</td>
                 <td>@Html.DisplayFor(modelItem => item.Age)</td>
+                <td>@Html.DisplayFor(modelItem => item.CreatedAt)</td>
+                <td>@Html.DisplayFor(modelItem => item.UpdateAt)</td>
                 <td>
                     @Html.ActionLink("Addresses", "Manage", "Address",
                              new { contactId = item.Id }, new { @class = "btn btn-primary" })
@@ -33,7 +35,7 @@
                              new { id = item.Id }, new { @class = "btn btn-primary" })
 
                     <form method="post" asp-action="Remove" asp-route-id="@item.Id" class="d-inline-block">
-                        <button type="button" class="btn btn-danger delete-button" data-name="@item.FirstName">
+                        <button type="button" class="btn btn-danger delete-button" data-name="@item.FullName">
                             Remove
                         </button>
                     </form>
