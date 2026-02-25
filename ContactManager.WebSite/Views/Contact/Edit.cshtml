@@ -11,8 +11,8 @@
     new {}, new { @class = "btn btn-secondary" })
 </div>
 
-<form method="post" asp-action="Edit" asp-route-id="@Model.ContactId">
-    <input asp-for="ContactId" type="hidden" />
+<form method="post" asp-action="Edit" asp-route-id="@Model.Id">
+    <input asp-for="Id" type="hidden" />
     <div class="row">
         <div class="col-md-4">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>

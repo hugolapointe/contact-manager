@@ -71,12 +71,12 @@ public class ContactController(ContactManagerContext context) : Controller {
     }
 
     [HttpGet]
-    [ResourceOwner]
+    [ContactOwner]
     public IActionResult Edit(Guid id) {
         var contactToEdit = HttpContext.GetResourceOwned<Contact>();
 
         var viewModel = new ContactEdit() {
-            ContactId = id,
+            Id = id,
             FirstName = contactToEdit.FirstName,
             LastName = contactToEdit.LastName,
             DateOfBirth = contactToEdit.DateOfBirth,
@@ -87,10 +87,10 @@ public class ContactController(ContactManagerContext context) : Controller {
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [ResourceOwner]
+    [ContactOwner]
     public async Task<IActionResult> Edit(Guid id, ContactEdit viewModel) {
         if (!ModelState.IsValid) {
-            viewModel.ContactId = id;
+            viewModel.Id = id;
             return View(viewModel);
         }
 
@@ -104,7 +104,7 @@ public class ContactController(ContactManagerContext context) : Controller {
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [ResourceOwner]
+    [ContactOwner]
     public async Task<IActionResult> Remove(Guid id) {
         var contactToRemove = HttpContext.GetResourceOwned<Contact>();
 

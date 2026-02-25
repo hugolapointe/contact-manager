@@ -10,7 +10,7 @@ namespace ContactManager.WebSite.ViewModels.Contact;
 public class ContactEdit {
     [HiddenInput(DisplayValue = false)]
     [Editable(false)]
-    public Guid ContactId { get; set; }
+    public Guid Id { get; set; }
 
     [Display(Name = "First Name")]
     public string? FirstName { get; set; }

@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace ContactManager.WebSite.Authorization;
 
 // Charge la ressource, valide l'ownership, puis la stocke dans HttpContext.
-public class ResourceOwnerFilter(string routeParameter, ContactManagerContext context) 
+public class ContactOwnerFilter(string routeParameter, ContactManagerContext context) 
 : IAsyncActionFilter {
 
     public async Task OnActionExecutionAsync(ActionExecutingContext filterContext, ActionExecutionDelegate next) {

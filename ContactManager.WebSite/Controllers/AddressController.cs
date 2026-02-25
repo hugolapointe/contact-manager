@@ -11,11 +11,11 @@ using Microsoft.EntityFrameworkCore;
 namespace ContactManager.WebSite.Controllers;
 
 [Authorize]
+[ContactOwner("contactId")]
 public class AddressController(ContactManagerContext context) : Controller {
     private readonly ContactManagerContext _context = context;
 
     [HttpGet]
-    [ResourceOwner("contactId")]
     public async Task<IActionResult> Manage(Guid contactId) {
         var contact = HttpContext.GetResourceOwned<Contact>();
 
@@ -41,7 +41,6 @@ public class AddressController(ContactManagerContext context) : Controller {
     }
 
     [HttpGet]
-    [ResourceOwner("contactId")]
     public IActionResult Create(Guid contactId) {
         return View(new AddressCreate {
             ContactId = contactId,
@@ -50,7 +49,6 @@ public class AddressController(ContactManagerContext context) : Controller {
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [ResourceOwner("contactId")]
     public async Task<IActionResult> Create(Guid contactId, AddressCreate viewModel) {
         viewModel.ContactId = contactId;
 
@@ -74,7 +72,6 @@ public class AddressController(ContactManagerContext context) : Controller {
     }
 
     [HttpGet]
-    [ResourceOwner("contactId")]
     public async Task<IActionResult> Edit(Guid id, Guid contactId) {
         var contact = HttpContext.GetResourceOwned<Contact>();
 
@@ -97,7 +94,6 @@ public class AddressController(ContactManagerContext context) : Controller {
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [ResourceOwner("contactId")]
     public async Task<IActionResult> Edit(Guid id, Guid contactId, AddressEdit viewModel) {
         var contact = HttpContext.GetResourceOwned<Contact>();
 
@@ -126,7 +122,6 @@ public class AddressController(ContactManagerContext context) : Controller {
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [ResourceOwner("contactId")]
     public async Task<IActionResult> Remove(Guid id, Guid contactId) {
         var contact = HttpContext.GetResourceOwned<Contact>();
 

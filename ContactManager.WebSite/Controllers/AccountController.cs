@@ -85,7 +85,7 @@ public class AccountController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> LogOut() {
         await _signInManager.SignOutAsync();
-
+        this.SetSuccessMessage("Logout successful.");
         return RedirectToAction(nameof(HomeController.Index), "Home");
     }
 }
