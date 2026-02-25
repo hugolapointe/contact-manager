@@ -38,12 +38,13 @@ public class AccountController(
 
         if (!signInResult.Succeeded) {
             if (signInResult.IsNotAllowed) {
-                return this.ViewWithError(viewModel, "You are not allowed to log in.");
+                this.AddModelError("You are not allowed to log in.");
             } else if (signInResult.IsLockedOut) {
-                return this.ViewWithError(viewModel, "Your account is locked out.");
+                this.AddModelError("Your account is locked out.");
             } else {
-                return this.ViewWithError(viewModel, "Invalid username or password.");
+                this.AddModelError("Invalid username or password.");
             }
+            return View(viewModel);
         }
 
         if (string.IsNullOrEmpty(viewModel.ReturnUrl) || !Url.IsLocalUrl(viewModel.ReturnUrl)) {
@@ -71,7 +72,8 @@ public class AccountController(
         var createResult = await _userManager.CreateAsync(userToCreate, viewModel.Password);
 
         if (!createResult.Succeeded) {
-            return this.ViewWithErrors(viewModel, createResult.Errors.Select(error => error.Description));
+            this.AddModelErrors(createResult.Errors.Select(error => error.Description));
+            return View(viewModel);
         }
 
         await _signInManager.SignInAsync(userToCreate, true);

@@ -2,6 +2,7 @@ using ContactManager.Core;
 using ContactManager.Core.Domain.Entities;
 using ContactManager.WebSite.Authorization;
 using ContactManager.WebSite.ViewModels.Address;
+using ContactManager.WebSite.Utilities;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -68,6 +69,7 @@ public class AddressController(ContactManagerContext context) : Controller {
         _context.Addresses.Add(addressToCreate);
         await _context.SaveChangesAsync();
 
+        this.SetSuccessMessage("Address added successfully.");
         return RedirectToAction(nameof(Manage), new { contactId });
     }
 
@@ -118,8 +120,8 @@ public class AddressController(ContactManagerContext context) : Controller {
             viewModel.PostalCode!);
         await _context.SaveChangesAsync();
 
-        return RedirectToAction(nameof(Manage),
-            new { contactId });
+        this.SetSuccessMessage("Address updated successfully.");
+        return RedirectToAction(nameof(Manage), new { contactId });
     }
 
     [HttpPost]
@@ -136,7 +138,7 @@ public class AddressController(ContactManagerContext context) : Controller {
         _context.Addresses.Remove(addressToRemove);
         await _context.SaveChangesAsync();
 
-        return RedirectToAction(nameof(Manage),
-            new { contactId });
+        this.SetSuccessMessage("Address deleted successfully.");
+        return RedirectToAction(nameof(Manage), new { contactId });
     }
 }

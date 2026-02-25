@@ -66,6 +66,7 @@ public class ContactController(ContactManagerContext context) : Controller {
         contactToCreate.Addresses.Add(defaultAddress);
         await _context.SaveChangesAsync();
 
+        this.SetSuccessMessage("Contact created successfully.");
         return RedirectToAction(nameof(Manage));
     }
 
@@ -97,6 +98,7 @@ public class ContactController(ContactManagerContext context) : Controller {
         contactToEdit.Update(viewModel.FirstName!, viewModel.LastName!, viewModel.DateOfBirth!.Value);
         await _context.SaveChangesAsync();
 
+        this.SetSuccessMessage("Contact updated successfully.");
         return RedirectToAction(nameof(Manage));
     }
 
@@ -109,6 +111,7 @@ public class ContactController(ContactManagerContext context) : Controller {
         _context.Contacts.Remove(contactToRemove);
         await _context.SaveChangesAsync();
 
+        this.SetSuccessMessage("Contact deleted successfully.");
         return RedirectToAction(nameof(Manage));
     }
 }

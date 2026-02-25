@@ -59,28 +59,31 @@ public class UserController(
         var roleName = role?.Name;
 
         if (string.IsNullOrWhiteSpace(roleName)) {
-            return this.ViewWithError(viewModel, "Selected role was not found.");
+            this.AddModelError("Selected role was not found.");
+            return View(viewModel);
         }
 
         if (!AppRole.IsSupported(roleName)) {
-            return this.ViewWithError(viewModel, $"Unsupported role {roleName}.");
+            this.AddModelError($"Unsupported role {roleName}.");
+            return View(viewModel);
         }
 
         var userToCreate = AppUser.Create(viewModel.UserName, roleName);
         var createResult = await _userManager.CreateAsync(userToCreate, viewModel.Password);
 
         if (!createResult.Succeeded) {
-            return this.ViewWithErrors(viewModel, createResult.Errors.Select(error => error.Description));
+            this.AddModelErrors(createResult.Errors.Select(error => error.Description));
+            return View(viewModel);
         }
 
         var addToRoleResult = await _userManager.AddToRoleAsync(userToCreate, roleName);
 
         if (!addToRoleResult.Succeeded) {
-            return this.ViewWithErrors(
-                viewModel,
+            this.AddModelErrors(
                 addToRoleResult.Errors
                     .Select(error => error.Description)
                     .Append($"Unable to add the user to the role {roleName}."));
+            return View(viewModel);
         }
 
         this.SetSuccessMessage($"User '{userToCreate.UserName}' created successfully.");

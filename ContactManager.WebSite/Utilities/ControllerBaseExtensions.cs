@@ -21,25 +21,19 @@ public static class ControllerBaseExtensions {
         return userId;
     }
 
-    // Utiliser dans un POST qui retourne la même vue (pas de redirect) quand il y a plusieurs erreurs.
-    // Les messages sont injectés dans ModelState puis la vue est retournée avec le modèle courant.
-    public static IActionResult ViewWithErrors<TModel>(
-        this Controller controller,
-        TModel viewModel,
-        IEnumerable<string> errors) {
+
+    // Ajoute une ou plusieurs erreurs personnalisées au ModelState.
+    public static void AddModelErrors(this Controller controller, IEnumerable<string> errors) {
         foreach (var error in errors.Where(error => !string.IsNullOrWhiteSpace(error))) {
             controller.ModelState.AddModelError(string.Empty, error);
         }
-
-        return controller.View(viewModel);
     }
 
-    // Variante pratique de ViewWithErrors pour le cas le plus fréquent: une seule erreur.
-    public static IActionResult ViewWithError<TModel>(
-        this Controller controller,
-        TModel viewModel,
-        string error) {
-        return controller.ViewWithErrors(viewModel, [error]);
+    // Variante pratique pour une seule erreur personnalisée.
+    public static void AddModelError(this Controller controller, string error) {
+        if (!string.IsNullOrWhiteSpace(error)) {
+            controller.ModelState.AddModelError(string.Empty, error);
+        }
     }
 
     // Utiliser dans un flux PRG (Post/Redirect/Get) pour afficher un message d'erreur ponctuel
