@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ContactManager.WebSite.ViewModels.Address;
 
-public class AddressManage {
+public class AddressList {
     [HiddenInput(DisplayValue = false)]
     [Editable(false)]
     public Guid ContactId { get; set; }

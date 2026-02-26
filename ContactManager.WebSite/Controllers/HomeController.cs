@@ -11,7 +11,7 @@ namespace ContactManager.WebSite.Controllers;
 public class HomeController : Controller {
 
     [HttpGet]
-    public IActionResult Index() => RedirectToAction("Manage", "Contact");
+    public IActionResult Index() => RedirectToAction("Index", "Contact");
 
     [HttpGet]
     [AllowAnonymous]

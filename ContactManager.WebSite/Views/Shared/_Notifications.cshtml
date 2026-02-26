@@ -1,0 +1,18 @@
+@{
+    var success = TempData["Notification.Success"] as string;
+    var error = TempData["Notification.Error"] as string;
+    var info = TempData["Notification.Info"] as string;
+    var warning = TempData["Notification.Warning"] as string;
+}
+@if (!string.IsNullOrEmpty(success)) {
+    <div class="alert alert-success" role="alert">@success</div>
+}
+@if (!string.IsNullOrEmpty(error)) {
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+@if (!string.IsNullOrEmpty(info)) {
+    <div class="alert alert-info" role="alert">@info</div>
+}
+@if (!string.IsNullOrEmpty(warning)) {
+    <div class="alert alert-warning" role="alert">@warning</div>
+}

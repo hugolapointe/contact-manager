@@ -4,9 +4,9 @@ using System.Security.Claims;
 
 namespace ContactManager.WebSite.Utilities;
 
+public enum NotificationType { Success, Error, Info, Warning }
+
 public static class ControllerBaseExtensions {
-    private const string FlashErrorKey = "Error";
-    private const string FlashSuccessKey = "Success";
 
     // Utiliser quand une action exige un utilisateur authentifié avec un NameIdentifier valide.
     // Cette méthode est utile pour simplifier les actions qui ont besoin d'un Guid utilisateur
@@ -36,14 +36,8 @@ public static class ControllerBaseExtensions {
         }
     }
 
-    // Utiliser dans un flux PRG (Post/Redirect/Get) pour afficher un message d'erreur ponctuel
-    // après redirection, via la partial partagée de feedback.
-    public static void SetErrorMessage(this Controller controller, string errorMessage) {
-        controller.TempData[FlashErrorKey] = errorMessage;
-    }
-
-    // Utiliser dans un flux PRG pour afficher un message de succès ponctuel après redirection.
-    public static void SetSuccessMessage(this Controller controller, string successMessage) {
-        controller.TempData[FlashSuccessKey] = successMessage;
+    // Ajoute une notification générique (succès, erreur, info, warning) à TempData
+    public static void AddNotification(this Controller controller, string message, NotificationType type) {
+        controller.TempData[$"Notification.{type}"] = message;
     }
 }

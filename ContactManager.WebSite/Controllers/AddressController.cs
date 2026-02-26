@@ -16,7 +16,7 @@ public class AddressController(ContactManagerContext context) : Controller {
     private readonly ContactManagerContext _context = context;
 
     [HttpGet]
-    public async Task<IActionResult> Manage(Guid contactId) {
+    public async Task<IActionResult> Index(Guid contactId) {
         var contact = HttpContext.GetResourceOwned<Contact>();
 
         var addressItems = await _context.Addresses
@@ -33,7 +33,7 @@ public class AddressController(ContactManagerContext context) : Controller {
             })
             .ToListAsync();
 
-        return View(new AddressManage {
+        return View(new AddressList {
             ContactId = contactId,
             ContactFullName = contact.FullName,
             Addresses = addressItems,
@@ -67,8 +67,8 @@ public class AddressController(ContactManagerContext context) : Controller {
         _context.Addresses.Add(addressToCreate);
         await _context.SaveChangesAsync();
 
-        this.SetSuccessMessage("Address added successfully.");
-        return RedirectToAction(nameof(Manage), new { contactId });
+        this.AddNotification("Address added successfully.", NotificationType.Success);
+        return RedirectToAction(nameof(Index), new { contactId });
     }
 
     [HttpGet]
@@ -116,8 +116,8 @@ public class AddressController(ContactManagerContext context) : Controller {
             viewModel.PostalCode!);
         await _context.SaveChangesAsync();
 
-        this.SetSuccessMessage("Address updated successfully.");
-        return RedirectToAction(nameof(Manage), new { contactId });
+        this.AddNotification("Address updated successfully.", NotificationType.Success);
+        return RedirectToAction(nameof(Index), new { contactId });
     }
 
     [HttpPost]
@@ -133,7 +133,7 @@ public class AddressController(ContactManagerContext context) : Controller {
         _context.Addresses.Remove(addressToRemove);
         await _context.SaveChangesAsync();
 
-        this.SetSuccessMessage("Address deleted successfully.");
-        return RedirectToAction(nameof(Manage), new { contactId });
+        this.AddNotification("Address deleted successfully.", NotificationType.Success);
+        return RedirectToAction(nameof(Index), new { contactId });
     }
 }

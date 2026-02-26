@@ -17,7 +17,7 @@ public class UserController(
     private readonly RoleManager<AppRole> _roleManager = roleManager;
 
     [HttpGet]
-    public async Task<IActionResult> Manage() {
+    public async Task<IActionResult> Index() {
         var users = await _userManager.Users
             .AsNoTracking()
             .OrderBy(user => user.UserName)
@@ -86,8 +86,8 @@ public class UserController(
             return View(viewModel);
         }
 
-        this.SetSuccessMessage($"User '{userToCreate.UserName}' created successfully.");
-        return RedirectToAction(nameof(Manage));
+        this.AddNotification($"User '{userToCreate.UserName}' created successfully.", NotificationType.Success);
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
@@ -95,8 +95,8 @@ public class UserController(
     public async Task<IActionResult> ResetPassword(Guid id) {
         var userToReset = await _userManager.FindByIdAsync(id.ToString());
         if (userToReset is null) {
-            this.SetErrorMessage("User was not found.");
-            return RedirectToAction(nameof(Manage));
+            this.AddNotification("User was not found.", NotificationType.Error);
+            return RedirectToAction(nameof(Index));
         }
 
         var resetToken = await _userManager.GeneratePasswordResetTokenAsync(userToReset);
@@ -106,8 +106,8 @@ public class UserController(
         var resetResult = await _userManager.ResetPasswordAsync(userToReset, resetToken, generatedPassword);
 
         if (!resetResult.Succeeded) {
-            this.SetErrorMessage(string.Join(" ", resetResult.Errors.Select(error => error.Description)));
-            return RedirectToAction(nameof(Manage));
+            this.AddNotification(string.Join(" ", resetResult.Errors.Select(error => error.Description)), NotificationType.Error);
+            return RedirectToAction(nameof(Index));
         }
 
         return View(new ResetPassword {
@@ -122,14 +122,14 @@ public class UserController(
         var currentUserId = this.GetRequiredUserId();
 
         if (currentUserId == id) {
-            this.SetErrorMessage("You cannot remove your own account.");
-            return RedirectToAction(nameof(Manage));
+            this.AddNotification("You cannot remove your own account.", NotificationType.Error);
+            return RedirectToAction(nameof(Index));
         }
 
         var userToRemove = await _userManager.FindByIdAsync(id.ToString());
         if (userToRemove is null) {
-            this.SetErrorMessage("User was not found.");
-            return RedirectToAction(nameof(Manage));
+            this.AddNotification("User was not found.", NotificationType.Error);
+            return RedirectToAction(nameof(Index));
         }
 
         var roles = await _userManager.GetRolesAsync(userToRemove);
@@ -140,19 +140,19 @@ public class UserController(
             var administratorCount = administrators.Count;
 
             if (administratorCount <= 1) {
-                this.SetErrorMessage("You cannot remove the last administrator.");
-                return RedirectToAction(nameof(Manage));
+                this.AddNotification("You cannot remove the last administrator.", NotificationType.Error);
+                return RedirectToAction(nameof(Index));
             }
         }
 
         var deleteResult = await _userManager.DeleteAsync(userToRemove);
 
         if (!deleteResult.Succeeded) {
-            this.SetErrorMessage(string.Join(" ", deleteResult.Errors.Select(error => error.Description)));
-            return RedirectToAction(nameof(Manage));
+            this.AddNotification(string.Join(" ", deleteResult.Errors.Select(error => error.Description)), NotificationType.Error);
+            return RedirectToAction(nameof(Index));
         }
 
-        this.SetSuccessMessage($"User '{userToRemove.UserName}' removed successfully.");
-        return RedirectToAction(nameof(Manage));
+        this.AddNotification($"User '{userToRemove.UserName}' removed successfully.", NotificationType.Success);
+        return RedirectToAction(nameof(Index));
     }
 }

@@ -1,0 +1,48 @@
+@model IEnumerable<UserItem>
+
+@{
+	ViewData["Title"] = "Users";
+}
+
+<h1>Users</h1>
+
+<div class="mt-2 mb-2">
+	@Html.ActionLink("Create", "Create",
+	new { }, new { @class = "btn btn-primary" })
+</div>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>
+				@Html.DisplayNameFor(model => model.UserName)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.RoleName)
+			</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model) {
+			<tr>
+				<td>
+					@Html.DisplayFor(modelItem => item.UserName)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.RoleName)
+				</td>
+				<td>
+					<form method="post" asp-action="ResetPassword" asp-route-id="@item.Id" class="d-inline-block">
+						<input type="submit" class="btn btn-secondary" value="Reset Password" />
+					</form>
+					<form method="post" asp-action="Remove" asp-route-id="@item.Id" class="d-inline-block">
+						<button type="button" class="btn btn-danger delete-button" data-name="@item.UserName">
+							Remove
+						</button>
+					</form>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>

@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<ContactItem>
 
 @{
-    ViewData["Title"] = "Manage";
+    ViewData["Title"] = "Contacts";
 }
 
 <h1>Your Contacts</h1>
@@ -29,7 +29,7 @@
                 <td>@Html.DisplayFor(modelItem => item.CreatedAt)</td>
                 <td>@Html.DisplayFor(modelItem => item.UpdateAt)</td>
                 <td>
-                    @Html.ActionLink("Addresses", "Manage", "Address",
+                    @Html.ActionLink("Addresses", "Index", "Address",
                              new { contactId = item.Id }, new { @class = "btn btn-primary" })
                     @Html.ActionLink("Edit", "Edit",
                              new { id = item.Id }, new { @class = "btn btn-primary" })

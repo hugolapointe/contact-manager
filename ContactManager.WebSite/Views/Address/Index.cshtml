@@ -1,0 +1,64 @@
+@model AddressList
+
+@{
+	ViewData["Title"] = "Addresses";
+}
+
+<h1>Addresses of <u>@Model.ContactFullName</u></h1>
+
+<div class="mt-2 mb-2">
+	@Html.ActionLink("Back", "Index", "Contact", 
+		new {}, new { @class = "btn btn-secondary" })
+	@Html.ActionLink("Create", "Create", 
+		new { contactId = @Model.ContactId }, new { @class = "btn btn-primary" })
+</div>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>
+				Street Number
+			</th>
+			<th>
+				Street Name
+			</th>
+			<th>
+				City
+			</th>
+			<th>
+				Postal Code
+			</th>
+			<th>
+				Created At
+			</th>
+			<th>
+				Updated At
+			</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+@foreach (var item in Model.Addresses) {
+		<tr>
+			<td>
+				@Html.DisplayFor(modelItem => item.StreetNumber)
+			</td>
+			<td>
+				@Html.DisplayFor(modelItem => item.StreetName)
+			</td>
+			<td>
+				@Html.DisplayFor(modelItem => item.City)
+			</td>
+			<td>
+				@Html.DisplayFor(modelItem => item.PostalCode)
+			</td>
+			<td>
+				@Html.DisplayFor(modelItem => item.CreatedAt)
+			</td>
+			<td>
+				@Html.DisplayFor(modelItem => item.UpdateAt)
+			</td>
+		</tr>
+}
+</tbody>
+</table>

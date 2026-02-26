@@ -78,14 +78,14 @@ public class AccountController(
 
         await _signInManager.SignInAsync(userToCreate, true);
 
-        return RedirectToAction(nameof(ContactController.Manage), "Contact");
+        return RedirectToAction(nameof(ContactController.Index), "Contact");
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> LogOut() {
         await _signInManager.SignOutAsync();
-        this.SetSuccessMessage("Logout successful.");
+        this.AddNotification("Logout successful.", NotificationType.Success);
         return RedirectToAction(nameof(HomeController.Index), "Home");
     }
 }
