@@ -26,7 +26,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		@foreach (var item in Model.Addresses) {
+		@foreach (var item in Model.Items) {
 			<tr>
 				<td>@Html.DisplayFor(modelItem => item.StreetNumber)</td>
 				<td>@Html.DisplayFor(modelItem => item.StreetName)</td>
@@ -47,3 +47,5 @@
 		}
 	</tbody>
 </table>
+
+@await Html.PartialAsync("_Pagination", Model)

@@ -1,0 +1,30 @@
+@using ContactManager.WebSite.ViewModels.Shared
+@model IPaginated
+@{
+    var baseParams = ViewContext.HttpContext.Request.Query
+        .Where(kv => kv.Key != "page")
+        .ToDictionary(kv => kv.Key, kv => kv.Value.ToString());
+}
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @if (Model.HasPreviousPage) {
+            var prev = new Dictionary<string, string>(baseParams) { ["page"] = (Model.PageIndex - 1).ToString() };
+            <li class="page-item">
+                <a class="page-link" asp-all-route-data="prev">Previous</a>
+            </li>
+        } else {
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        }
+        <li class="page-item disabled">
+            <span class="page-link">Page @Model.PageIndex of @Model.TotalPages</span>
+        </li>
+        @if (Model.HasNextPage) {
+            var next = new Dictionary<string, string>(baseParams) { ["page"] = (Model.PageIndex + 1).ToString() };
+            <li class="page-item">
+                <a class="page-link" asp-all-route-data="next">Next</a>
+            </li>
+        } else {
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+        }
+    </ul>
+</nav>

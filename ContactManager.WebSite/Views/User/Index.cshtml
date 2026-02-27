@@ -1,4 +1,4 @@
-@model UserList
+@model PaginatedList<UserItem>
 
 @{
 	ViewData["Title"] = "Users";
@@ -15,22 +15,22 @@
 	<thead>
 		<tr>
 			<th>
-				@Html.DisplayNameFor(model => model.Users.First().UserName)
+				@Html.DisplayNameFor(model => model.Items.First().UserName)
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.Users.First().RoleName)
+				@Html.DisplayNameFor(model => model.Items.First().RoleNames)
 			</th>
 			<th></th>
 		</tr>
 	</thead>
 	<tbody>
-		@foreach (var item in Model.Users) {
+		@foreach (var item in Model.Items) {
 			<tr>
 				<td>
 					@Html.DisplayFor(modelItem => item.UserName)
 				</td>
 				<td>
-					@Html.DisplayFor(modelItem => item.RoleName)
+					@(item.RoleNames.Count > 0 ? string.Join(", ", item.RoleNames) : "No role")
 				</td>
 				<td>
 					<form method="post" asp-action="ResetPassword" asp-route-id="@item.Id" class="d-inline-block">
@@ -46,3 +46,5 @@
 		}
 	</tbody>
 </table>
+
+@await Html.PartialAsync("_Pagination", Model)

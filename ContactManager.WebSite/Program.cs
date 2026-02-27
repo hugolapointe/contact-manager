@@ -15,13 +15,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ContactManagerContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<AppUser, AppRole>(options => {
-        options.Password.RequiredLength = 8;
-        options.Password.RequireUppercase = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireDigit = true;
-        options.Password.RequireNonAlphanumeric = true;
-    })
+builder.Services.AddIdentity<AppUser, AppRole>()
     .AddEntityFrameworkStores<ContactManagerContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();

@@ -1,6 +1,7 @@
 using ContactManager.Core;
 using ContactManager.Core.Domain.Entities;
 using ContactManager.WebSite.Utilities;
+using ContactManager.WebSite.ViewModels.Shared;
 using ContactManager.WebSite.ViewModels.User;
 
 using Microsoft.AspNetCore.Authorization;
@@ -13,32 +14,30 @@ namespace ContactManager.WebSite.Controllers;
 [Authorize(Roles = AppRole.AdministratorName)]
 public class UserController(
     UserManager<AppUser> userManager,
-    RoleManager<AppRole> roleManager,
-    ContactManagerContext context) : Controller {
+    RoleManager<AppRole> roleManager) : Controller {
+
+    private const int PageSize = 10;
 
     [HttpGet]
-    public async Task<IActionResult> Index() {
-        // Chargement en 3 requêtes au lieu d'une requête par utilisateur (N+1).
-        var users = await userManager.Users
-            .AsNoTracking()
+    public async Task<IActionResult> Index(int page = 1) {
+        var baseQuery = userManager.Users.AsNoTracking();
+
+        var totalCount = await baseQuery.CountAsync();
+
+        var users = await baseQuery
+            .Include(user => user.Roles)
             .OrderBy(user => user.UserName)
+            .Skip((page - 1) * PageSize)
+            .Take(PageSize)
             .ToListAsync();
 
-        var userRoles = await context.Set<IdentityUserRole<Guid>>().ToListAsync();
-        var roles = await roleManager.Roles.ToListAsync();
-
-        var userItems = users.Select(user => {
-            var roleId = userRoles.FirstOrDefault(ur => ur.UserId == user.Id)?.RoleId;
-            var roleName = roles.FirstOrDefault(r => r.Id == roleId)?.Name;
-
-            return new UserItem {
-                Id = user.Id,
-                UserName = user.UserName!,
-                RoleName = roleName ?? "No role",
-            };
+        var items = users.Select(user => new UserItem {
+            Id = user.Id,
+            UserName = user.UserName!,
+            RoleNames = user.Roles.Select(role => role.Name!).ToList()
         }).ToList();
 
-        return View(new UserList { Users = userItems });
+        return View(new PaginatedList<UserItem>(items, totalCount, page, PageSize));
     }
 
     [HttpGet]

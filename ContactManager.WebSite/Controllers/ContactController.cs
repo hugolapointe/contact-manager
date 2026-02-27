@@ -3,6 +3,7 @@ using ContactManager.Core.Domain.Entities;
 using ContactManager.WebSite.Authorization;
 using ContactManager.WebSite.Utilities;
 using ContactManager.WebSite.ViewModels.Contact;
+using ContactManager.WebSite.ViewModels.Shared;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,25 +14,32 @@ namespace ContactManager.WebSite.Controllers;
 [Authorize]
 public class ContactController(ContactManagerContext context) : Controller {
 
+    private const int PageSize = 10;
+
     [HttpGet]
-    public async Task<IActionResult> Index() {
+    public async Task<IActionResult> Index(int page = 1) {
         var currentUserId = this.GetRequiredUserId();
 
-        var contactItems = await context.Contacts
+        var baseQuery = context.Contacts
             .AsNoTracking()
-            .Where(contact => contact.OwnerId == currentUserId)
+            .Where(contact => contact.OwnerId == currentUserId);
+
+        var totalCount = await baseQuery.CountAsync();
+
+        var items = await baseQuery
             .OrderBy(contact => contact.LastName)
             .ThenBy(contact => contact.FirstName)
+            .Skip((page - 1) * PageSize)
+            .Take(PageSize)
             .Select(contact => new ContactItem {
                 Id = contact.Id,
                 FullName = contact.FirstName + " " + contact.LastName,
                 Age = contact.Age,
                 CreatedAt = contact.CreatedAt,
                 UpdatedAt = contact.UpdatedAt,
-            })
-            .ToListAsync();
+            }).ToListAsync();
 
-        return View(new ContactList { Contacts = contactItems });
+        return View(new PaginatedList<ContactItem>(items, totalCount, page, PageSize));
     }
 
     [HttpGet]

@@ -1,12 +1,23 @@
 using System.ComponentModel.DataAnnotations;
 
+using ContactManager.WebSite.ViewModels.Shared;
+
 namespace ContactManager.WebSite.ViewModels.Address;
 
-public class AddressList {
-    public Guid ContactId { get; set; }
+public class AddressList : PaginatedList<AddressItem> {
+    public Guid ContactId { get; }
 
     [Display(Name = "Contact")]
-    public string ContactFullName { get; set; } = string.Empty;
+    public string ContactFullName { get; }
 
-    public IEnumerable<AddressItem> Addresses { get; set; } = [];
+    public AddressList(
+        IReadOnlyList<AddressItem> items,
+        int totalCount,
+        int pageIndex,
+        int pageSize,
+        Guid contactId,
+        string contactFullName) : base(items, totalCount, pageIndex, pageSize) {
+        ContactId = contactId;
+        ContactFullName = contactFullName;
+    }
 }

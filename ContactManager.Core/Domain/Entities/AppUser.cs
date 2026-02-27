@@ -5,6 +5,7 @@ namespace ContactManager.Core.Domain.Entities;
 public class AppUser : IdentityUser<Guid> {
     // ===== Propriétés de navigation =====
     public virtual ICollection<Contact> Contacts { get; } = [];
+    public virtual ICollection<AppRole> Roles { get; } = [];
 
     // ===== Constructeurs (EF Core) =====
     protected AppUser() : base() { }

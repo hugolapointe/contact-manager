@@ -11,6 +11,6 @@ public class UserItem {
     [Display(Name = "Username")]
     public string UserName { get; set; } = string.Empty;
 
-    [Display(Name = "Role")]
-    public string RoleName { get; set; } = string.Empty;
+    [Display(Name = "Roles")]
+    public IReadOnlyList<string> RoleNames { get; set; } = [];
 }
