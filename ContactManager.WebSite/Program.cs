@@ -1,7 +1,7 @@
 using ContactManager.Core;
 using ContactManager.Core.Data;
 using ContactManager.Core.Domain.Entities;
-
+using ContactManager.WebSite.Utilities;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
@@ -24,14 +24,17 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
+builder.Services.Configure<PaginationOptions>(
+    builder.Configuration.GetSection("Pagination")
+);
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment()) {
     using var scope = app.Services.CreateScope();
     await RuntimeSeed.SeedAsync(scope.ServiceProvider);
-}
 
-if (!app.Environment.IsDevelopment()) {
+} else {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }

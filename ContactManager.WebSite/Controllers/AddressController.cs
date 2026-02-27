@@ -7,30 +7,33 @@ using ContactManager.WebSite.ViewModels.Address;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ContactManager.WebSite.Controllers;
 
+
 [Authorize]
 [ContactOwner("contactId")]
-public class AddressController(ContactManagerContext context) : Controller {
-
-    private const int PageSize = 10;
+public class AddressController(
+    ContactManagerContext context, 
+    IOptions<PaginationOptions> paginationOptions
+) : Controller {
 
     [HttpGet]
     public async Task<IActionResult> Index(Guid contactId, int page = 1) {
         var contact = HttpContext.GetContactOwned();
 
-        var baseQuery = context.Addresses
-            .AsNoTracking()
-            .Where(address => address.ContactId == contactId);
+        var baseQuery = context.Addresses.AsNoTracking()
+            .Where(address => address.ContactId == contactId)
+            .OrderBy(address => address.StreetName)
+            .ThenBy(address => address.StreetNumber);
 
         var totalCount = await baseQuery.CountAsync();
+        var pageSize = paginationOptions.Value.PageSize;
 
         var items = await baseQuery
-            .OrderBy(address => address.StreetName)
-            .ThenBy(address => address.StreetNumber)
-            .Skip((page - 1) * PageSize)
-            .Take(PageSize)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(address => new AddressItem {
                 Id = address.Id,
                 StreetNumber = address.StreetNumber,
@@ -41,7 +44,10 @@ public class AddressController(ContactManagerContext context) : Controller {
                 UpdatedAt = address.UpdatedAt,
             }).ToListAsync();
 
-        return View(new AddressList(items, totalCount, page, PageSize, contactId, contact.FullName));
+        return View(new AddressList(
+            items, totalCount, page, pageSize, 
+            contactId, contact.FullName
+        ));
     }
 
     [HttpGet]

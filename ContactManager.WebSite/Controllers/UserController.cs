@@ -8,27 +8,31 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ContactManager.WebSite.Controllers;
 
+
 [Authorize(Roles = AppRole.AdministratorName)]
 public class UserController(
-    UserManager<AppUser> userManager,
-    RoleManager<AppRole> roleManager) : Controller {
-
-    private const int PageSize = 10;
+    UserManager<AppUser> userManager, 
+    RoleManager<AppRole> roleManager, 
+    IOptions<PaginationOptions> paginationOptions
+) : Controller {
 
     [HttpGet]
     public async Task<IActionResult> Index(int page = 1) {
-        var baseQuery = userManager.Users.AsNoTracking();
+
+        var baseQuery = userManager.Users.AsNoTracking()
+            .OrderBy(user => user.UserName);
 
         var totalCount = await baseQuery.CountAsync();
+        var pageSize = paginationOptions.Value.PageSize;
 
         var users = await baseQuery
             .Include(user => user.Roles)
-            .OrderBy(user => user.UserName)
-            .Skip((page - 1) * PageSize)
-            .Take(PageSize)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
         var items = users.Select(user => new UserItem {
@@ -37,7 +41,7 @@ public class UserController(
             RoleNames = user.Roles.Select(role => role.Name!).ToList()
         }).ToList();
 
-        return View(new PaginatedList<UserItem>(items, totalCount, page, PageSize));
+        return View(new PaginatedList<UserItem>(items, totalCount, page, pageSize));
     }
 
     [HttpGet]

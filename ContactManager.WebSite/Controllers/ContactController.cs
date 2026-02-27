@@ -8,38 +8,42 @@ using ContactManager.WebSite.ViewModels.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ContactManager.WebSite.Controllers;
 
-[Authorize]
-public class ContactController(ContactManagerContext context) : Controller {
 
-    private const int PageSize = 10;
+[Authorize]
+public class ContactController(
+    ContactManagerContext context, 
+    IOptions<PaginationOptions> paginationOptions
+) : Controller {
 
     [HttpGet]
     public async Task<IActionResult> Index(int page = 1) {
+
         var currentUserId = this.GetRequiredUserId();
 
-        var baseQuery = context.Contacts
-            .AsNoTracking()
-            .Where(contact => contact.OwnerId == currentUserId);
+        var baseQuery = context.Contacts.AsNoTracking()
+            .Where(contact => contact.OwnerId == currentUserId)
+            .OrderBy(contact => contact.LastName)
+            .ThenBy(contact => contact.FirstName);
 
         var totalCount = await baseQuery.CountAsync();
+        var pageSize = paginationOptions.Value.PageSize;
 
         var items = await baseQuery
-            .OrderBy(contact => contact.LastName)
-            .ThenBy(contact => contact.FirstName)
-            .Skip((page - 1) * PageSize)
-            .Take(PageSize)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(contact => new ContactItem {
                 Id = contact.Id,
-                FullName = contact.FirstName + " " + contact.LastName,
+                FullName = contact.FullName,
                 Age = contact.Age,
                 CreatedAt = contact.CreatedAt,
                 UpdatedAt = contact.UpdatedAt,
             }).ToListAsync();
 
-        return View(new PaginatedList<ContactItem>(items, totalCount, page, PageSize));
+        return View(new PaginatedList<ContactItem>(items, totalCount, page, pageSize));
     }
 
     [HttpGet]

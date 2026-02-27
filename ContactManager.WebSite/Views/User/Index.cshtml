@@ -30,7 +30,7 @@
 					@Html.DisplayFor(modelItem => item.UserName)
 				</td>
 				<td>
-					@(item.RoleNames.Count > 0 ? string.Join(", ", item.RoleNames) : "No role")
+					@(item.RoleNames.Any() ? string.Join(", ", item.RoleNames) : "No role")
 				</td>
 				<td>
 					<form method="post" asp-action="ResetPassword" asp-route-id="@item.Id" class="d-inline-block">

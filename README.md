@@ -60,13 +60,9 @@ Actions principales offertes par l’application.
 
 ### Visiteur (non connecté)
 
-- Créer un compte.
 - Se connecter à l’application.
 
-### Utilisateur connecté
-
 - Accéder à la gestion des contacts depuis l’accueil.
-- Créer, modifier et supprimer ses contacts.
 - Ajouter, modifier et supprimer les adresses de ses contacts.
 - Se déconnecter.
 
