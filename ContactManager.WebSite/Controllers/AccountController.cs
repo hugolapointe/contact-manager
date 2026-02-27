@@ -12,8 +12,6 @@ namespace ContactManager.WebSite.Controllers;
 public class AccountController(
     UserManager<AppUser> userManager,
     SignInManager<AppUser> signInManager) : Controller {
-    private readonly UserManager<AppUser> _userManager = userManager;
-    private readonly SignInManager<AppUser> _signInManager = signInManager;
 
     [HttpGet]
     [AllowAnonymous]
@@ -26,14 +24,13 @@ public class AccountController(
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(Login viewModel, string? returnUrl = null) {
-        viewModel.ReturnUrl = returnUrl ?? viewModel.ReturnUrl;
-
+    public async Task<IActionResult> Login(Login viewModel) {
+        // ReturnUrl provient du champ caché du formulaire (rempli lors du GET).
         if (!ModelState.IsValid) {
             return View(viewModel);
         }
 
-        var signInResult = await _signInManager.PasswordSignInAsync(
+        var signInResult = await signInManager.PasswordSignInAsync(
             viewModel.UserName, viewModel.Password, isPersistent: viewModel.RememberMe, lockoutOnFailure: false);
 
         if (!signInResult.Succeeded) {
@@ -68,15 +65,23 @@ public class AccountController(
             return View(viewModel);
         }
 
-        var userToCreate = AppUser.Create(viewModel.UserName, AppRole.UserName);
-        var createResult = await _userManager.CreateAsync(userToCreate, viewModel.Password);
+        var newUser = AppUser.Create(viewModel.UserName!);
+        var createResult = await userManager.CreateAsync(newUser, viewModel.Password!);
 
         if (!createResult.Succeeded) {
             this.AddModelErrors(createResult.Errors.Select(error => error.Description));
             return View(viewModel);
         }
 
-        await _signInManager.SignInAsync(userToCreate, true);
+        // Assign default role "User"
+        var roleAssignResult = await userManager.AddToRoleAsync(newUser, AppRole.UserName);
+        if (!roleAssignResult.Succeeded) {
+            this.AddModelErrors(roleAssignResult.Errors.Select(error => error.Description));
+            await userManager.DeleteAsync(newUser);
+            return View(viewModel);
+        }
+
+        await signInManager.SignInAsync(newUser, true);
 
         return RedirectToAction(nameof(ContactController.Index), "Contact");
     }
@@ -84,7 +89,7 @@ public class AccountController(
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> LogOut() {
-        await _signInManager.SignOutAsync();
+        await signInManager.SignOutAsync();
         this.AddNotification("Logout successful.", NotificationType.Success);
         return RedirectToAction(nameof(HomeController.Index), "Home");
     }

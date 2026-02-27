@@ -101,7 +101,7 @@ public static class RuntimeSeed {
         await ensureRolesAsync(roleManager);
 
         foreach (var seedUser in SeedUsers) {
-            var user = await ensureUserAsync(userManager, seedUser.UserName, seedUser.Password, seedUser.RoleName);
+            var user = await ensureUserAsync(userManager, seedUser.UserName, seedUser.Password);
             await ensureRoleMembershipAsync(userManager, user, seedUser.RoleName);
             await ensureContactsAsync(context, user.Id, seedUser.Contacts, cancellationToken);
         }
@@ -126,13 +126,13 @@ public static class RuntimeSeed {
         }
     }
 
-    private static async Task<AppUser> ensureUserAsync(UserManager<AppUser> userManager, string userName, string password, string roleName) {
+    private static async Task<AppUser> ensureUserAsync(UserManager<AppUser> userManager, string userName, string password) {
         var existingUser = await userManager.FindByNameAsync(userName);
         if (existingUser is not null) {
             return existingUser;
         }
 
-        var userToCreate = AppUser.Create(userName, roleName);
+        var userToCreate = AppUser.Create(userName);
         var createResult = await userManager.CreateAsync(userToCreate, password);
 
         if (!createResult.Succeeded) {

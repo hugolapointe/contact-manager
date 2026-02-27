@@ -12,12 +12,9 @@ public class AppUser : IdentityUser<Guid> {
     protected AppUser(string userName) : base(userName) { }
 
     // ===== Méthodes métier =====
-    public static AppUser Create(string userName, string roleName) {
-        ArgumentException.ThrowIfNullOrWhiteSpace(userName);
 
-        if (!AppRole.IsSupported(roleName)) {
-            throw new ArgumentOutOfRangeException(nameof(roleName));
-        }
+    public static AppUser Create(string userName) {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userName);
 
         return new AppUser(userName);
     }

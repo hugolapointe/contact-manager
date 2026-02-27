@@ -16,6 +16,14 @@ public static class CommonValidationRules {
             .WithMessage("Please provide a valid name.");
     }
 
+    public static IRuleBuilderOptions<T, string?> IsValidCityName<T>(
+        this IRuleBuilder<T, string?> ruleBuilder) {
+        // Les villes québécoises suivent la même convention que les noms de personnes
+        // (lettres accentuées, tirets, apostrophes — ex. : Notre-Dame-de-Grâce).
+        return ruleBuilder.Matches(REGEX_VALID_PERSON_NAME, REGEX_OPTIONS)
+            .WithMessage("Please provide a valid city name.");
+    }
+
     public static IRuleBuilderOptions<T, string?> IsValidStreetName<T>(
         this IRuleBuilder<T, string?> ruleBuilder) {
         return ruleBuilder.Matches(REGEX_VALID_STREET_NAME, REGEX_OPTIONS)
@@ -78,7 +86,8 @@ public class BirthDateValidator : AbstractValidator<DateTime?> {
 public class StreetNumberValidator : AbstractValidator<int?> {
     public StreetNumberValidator() {
         RuleFor(streetNumber => streetNumber)
-            .NotEmpty()
+            .Cascade(CascadeMode.Stop)
+            .NotNull()
             .WithMessage("Please provide a street number.")
             .GreaterThan(0)
             .WithMessage("Please provide a positive street number.");
@@ -122,8 +131,8 @@ public class CityNameValidator : AbstractValidator<string?> {
             .WithMessage($"Please provide a city name between {CITY_NAME_LENGTH_MIN} and {CITY_NAME_LENGTH_MAX} characters.")
             .Must(cityName => cityName!.Trim() == cityName)
             .WithMessage("Please remove leading and trailing spaces from city name.")
-            .IsValidPersonName()
-            .WithMessage("Please provide a city name that contains only letters and spaces.");
+            .IsValidCityName()
+            .WithMessage("Please provide a city name that contains only letters, hyphens, and apostrophes.");
     }
 }
 
@@ -146,20 +155,21 @@ public class PostalCodeValidator : AbstractValidator<string?> {
 namespace ContactManager.Core.Domain.Validators.Identity {
 
 public class UsernameValidator : AbstractValidator<string?> {
-    private const RegexOptions REGEX_OPTIONS = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant;
+    // Pas de IgnoreCase : les noms d'utilisateur sont en minuscules uniquement.
+    private const RegexOptions REGEX_OPTIONS = RegexOptions.CultureInvariant;
 
     private const int LENGTH_MIN = 6;
-    private const string REGEX_USERNAME = @"^([a-z0-9_.-])+$";
+    private const string REGEX_USERNAME = @"^[a-z0-9_.-]+$";
 
     public UsernameValidator() {
         RuleFor(userName => userName)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
                 .WithMessage("The username cannot be empty.")
-            .Must(userName => userName!.Trim().Length >= LENGTH_MIN)
+            .Must(userName => userName!.Length >= LENGTH_MIN)
                 .WithMessage($"The username must have at least {LENGTH_MIN} characters.")
-            .Must(userName => Regex.IsMatch(userName!.Trim().ToLower(), REGEX_USERNAME, REGEX_OPTIONS))
-                .WithMessage("The username contains invalid characters.");
+            .Matches(REGEX_USERNAME, REGEX_OPTIONS)
+                .WithMessage("The username can only contain lowercase letters, digits, underscores, dots, and hyphens.");
     }
 }
 
@@ -173,6 +183,7 @@ public class PasswordValidator : AbstractValidator<string?> {
 
     public PasswordValidator() {
         RuleFor(password => password)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
                 .WithMessage("The password cannot be empty.")
             .MinimumLength(LENGTH_MIN)

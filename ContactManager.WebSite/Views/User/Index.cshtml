@@ -1,4 +1,4 @@
-@model IEnumerable<UserItem>
+@model UserList
 
 @{
 	ViewData["Title"] = "Users";
@@ -15,16 +15,16 @@
 	<thead>
 		<tr>
 			<th>
-				@Html.DisplayNameFor(model => model.UserName)
+				@Html.DisplayNameFor(model => model.Users.First().UserName)
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.RoleName)
+				@Html.DisplayNameFor(model => model.Users.First().RoleName)
 			</th>
 			<th></th>
 		</tr>
 	</thead>
 	<tbody>
-		@foreach (var item in Model) {
+		@foreach (var item in Model.Users) {
 			<tr>
 				<td>
 					@Html.DisplayFor(modelItem => item.UserName)

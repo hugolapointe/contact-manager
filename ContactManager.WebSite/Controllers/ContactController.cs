@@ -12,27 +12,26 @@ namespace ContactManager.WebSite.Controllers;
 
 [Authorize]
 public class ContactController(ContactManagerContext context) : Controller {
-    private readonly ContactManagerContext _context = context;
 
     [HttpGet]
     public async Task<IActionResult> Index() {
         var currentUserId = this.GetRequiredUserId();
 
-        var contactItems = await _context.Contacts
+        var contactItems = await context.Contacts
             .AsNoTracking()
             .Where(contact => contact.OwnerId == currentUserId)
             .OrderBy(contact => contact.LastName)
             .ThenBy(contact => contact.FirstName)
-            .Select(contact => new ContactItem() {
+            .Select(contact => new ContactItem {
                 Id = contact.Id,
-                FullName = contact.FullName,
+                FullName = contact.FirstName + " " + contact.LastName,
                 Age = contact.Age,
                 CreatedAt = contact.CreatedAt,
-                UpdateAt = contact.UpdateAt,
+                UpdatedAt = contact.UpdatedAt,
             })
             .ToListAsync();
 
-        return View(contactItems);
+        return View(new ContactList { Contacts = contactItems });
     }
 
     [HttpGet]
@@ -49,22 +48,21 @@ public class ContactController(ContactManagerContext context) : Controller {
 
         var currentUserId = this.GetRequiredUserId();
 
-        var contactToCreate = Contact.Create(
+        var contact = Contact.Create(
             currentUserId,
             viewModel.FirstName!,
             viewModel.LastName!,
             viewModel.DateOfBirth!.Value);
-        await _context.Contacts.AddAsync(contactToCreate);
 
-        var defaultAddress = Address.Create(
-            contactToCreate.Id,
+        contact.Addresses.Add(Address.Create(
+            contact.Id,
             viewModel.Address_StreetNumber!.Value,
             viewModel.Address_StreetName!,
             viewModel.Address_CityName!,
-            viewModel.Address_PostalCode!);
+            viewModel.Address_PostalCode!));
 
-        contactToCreate.Addresses.Add(defaultAddress);
-        await _context.SaveChangesAsync();
+        context.Contacts.Add(contact);
+        await context.SaveChangesAsync();
 
         this.AddNotification("Contact created successfully.", NotificationType.Success);
         return RedirectToAction(nameof(Index));
@@ -73,9 +71,9 @@ public class ContactController(ContactManagerContext context) : Controller {
     [HttpGet]
     [ContactOwner]
     public IActionResult Edit(Guid id) {
-        var contactToEdit = HttpContext.GetResourceOwned<Contact>();
+        var contactToEdit = HttpContext.GetContactOwned();
 
-        var viewModel = new ContactEdit() {
+        var viewModel = new ContactEdit {
             Id = id,
             FirstName = contactToEdit.FirstName,
             LastName = contactToEdit.LastName,
@@ -89,14 +87,15 @@ public class ContactController(ContactManagerContext context) : Controller {
     [ValidateAntiForgeryToken]
     [ContactOwner]
     public async Task<IActionResult> Edit(Guid id, ContactEdit viewModel) {
+        viewModel.Id = id;  // Toujours synchroniser avec la route (protection anti-tamper).
+
         if (!ModelState.IsValid) {
-            viewModel.Id = id;
             return View(viewModel);
         }
 
-        var contactToEdit = HttpContext.GetResourceOwned<Contact>();
+        var contactToEdit = HttpContext.GetContactOwned();
         contactToEdit.Update(viewModel.FirstName!, viewModel.LastName!, viewModel.DateOfBirth!.Value);
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         this.AddNotification("Contact updated successfully.", NotificationType.Success);
         return RedirectToAction(nameof(Index));
@@ -106,10 +105,10 @@ public class ContactController(ContactManagerContext context) : Controller {
     [ValidateAntiForgeryToken]
     [ContactOwner]
     public async Task<IActionResult> Remove(Guid id) {
-        var contactToRemove = HttpContext.GetResourceOwned<Contact>();
+        var contactToRemove = HttpContext.GetContactOwned();
 
-        _context.Contacts.Remove(contactToRemove);
-        await _context.SaveChangesAsync();
+        context.Contacts.Remove(contactToRemove);
+        await context.SaveChangesAsync();
 
         this.AddNotification("Contact deleted successfully.", NotificationType.Success);
         return RedirectToAction(nameof(Index));

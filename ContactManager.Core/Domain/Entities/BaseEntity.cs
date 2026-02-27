@@ -3,15 +3,15 @@ namespace ContactManager.Core.Domain.Entities;
 public abstract class BaseEntity : IAudible {
     public Guid Id { get; protected set; }
     public DateTime CreatedAt { get; protected set; }
-    public DateTime UpdateAt { get; protected set; }
+    public DateTime UpdatedAt { get; protected set; }
 
     protected BaseEntity() {
         CreatedAt = DateTime.UtcNow;
-
-        Update();
+        UpdatedAt = DateTime.UtcNow;
     }
 
-    protected virtual void Update() {
-        UpdateAt = DateTime.UtcNow;
+    // Met à jour le timestamp de dernière modification.
+    protected void Touch() {
+        UpdatedAt = DateTime.UtcNow;
     }
 }

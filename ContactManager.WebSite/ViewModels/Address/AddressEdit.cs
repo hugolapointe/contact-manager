@@ -8,12 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace ContactManager.WebSite.ViewModels.Address;
 
 public class AddressEdit {
-    [HiddenInput(DisplayValue = false)]
-    [Editable(false)]
+    // Utilisé par la vue pour générer les liens et l'action du formulaire.
+    // Les valeurs proviennent de la route, pas du formulaire (voir [FromRoute] dans le controller).
     public Guid AddressId { get; set; }
-
-    [HiddenInput(DisplayValue = false)]
-    [Editable(false)]
     public Guid ContactId { get; set; }
 
     [Display(Name = "Street Number")]

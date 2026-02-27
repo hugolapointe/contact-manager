@@ -12,8 +12,6 @@
 </div>
 
 <form method="post" asp-action="Edit" asp-route-id="@Model.AddressId" asp-route-contactId="@Model.ContactId">
-    <input asp-for="AddressId" type="hidden" />
-    <input asp-for="ContactId" type="hidden" />
     <div class="row">
         <div class="col-md-4">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>

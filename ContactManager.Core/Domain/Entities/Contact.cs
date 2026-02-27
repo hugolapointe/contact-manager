@@ -56,7 +56,7 @@ public class Contact : BaseEntity, IOwned {
         FirstName = firstName;
         LastName = lastName;
         DateOfBirth = dateOfBirth;
-        
-        Update();
+
+        Touch();
     }
 }

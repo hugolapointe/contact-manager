@@ -7,8 +7,8 @@ using System.Security.Claims;
 
 namespace ContactManager.WebSite.Authorization;
 
-// Charge la ressource, valide l'ownership, puis la stocke dans HttpContext.
-public class ContactOwnerFilter(string routeParameter, ContactManagerContext context) 
+// Charge le contact, valide l'ownership, puis le stocke dans HttpContext.
+public class ContactOwnerFilter(string routeParameter, ContactManagerContext context)
 : IAsyncActionFilter {
 
     public async Task OnActionExecutionAsync(ActionExecutingContext filterContext, ActionExecutionDelegate next) {
@@ -18,7 +18,7 @@ public class ContactOwnerFilter(string routeParameter, ContactManagerContext con
             return;
         }
 
-        // 2) On charge explicitement Contact: c'est la seule ressource d'ownership du cours.
+        // 2) On charge explicitement Contact : c'est la seule ressource d'ownership du cours.
         var contact = await context.Contacts.FindAsync(entityId);
         if (contact is null) {
             filterContext.Result = new NotFoundResult();
@@ -28,22 +28,21 @@ public class ContactOwnerFilter(string routeParameter, ContactManagerContext con
         // 3) On compare le propriétaire de la ressource et l'utilisateur connecté.
         var userId = filterContext.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userId, out var currentUserId) || contact.OwnerId != currentUserId) {
-            // Non propriétaire => interdit (même comportement qu'avant).
             filterContext.Result = new ForbidResult();
             return;
         }
 
-        filterContext.HttpContext.SetResourceOwned(contact);
+        filterContext.HttpContext.SetContactOwned(contact);
         await next();
     }
 }
 
-public static class ResourceOwnedExtensions {
-    private const string Key = "ResourceOwned";
+public static class ContactOwnedExtensions {
+    private const string Key = "ContactOwned";
 
-    internal static void SetResourceOwned(this HttpContext context, IOwned entity)
-        => context.Items[Key] = entity;
+    internal static void SetContactOwned(this HttpContext context, Contact contact)
+        => context.Items[Key] = contact;
 
-    public static T GetResourceOwned<T>(this HttpContext context) where T : class, IOwned
-        => (T)context.Items[Key]!;
+    public static Contact GetContactOwned(this HttpContext context)
+        => (Contact)context.Items[Key]!;
 }

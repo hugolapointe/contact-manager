@@ -16,6 +16,7 @@ public class Address : BaseEntity {
     protected Address() { }
 
     // ===== Méthodes métier =====
+
     public static Address Create(Guid contactId, int streetNumber, string streetName, string cityName, string postalCode) {
         ArgumentOutOfRangeException.ThrowIfEqual(contactId, Guid.Empty);
         ArgumentOutOfRangeException.ThrowIfLessThan(streetNumber, 1);
@@ -44,6 +45,6 @@ public class Address : BaseEntity {
         CityName = cityName;
         PostalCode = postalCode;
 
-        Update();
+        Touch();
     }
 }

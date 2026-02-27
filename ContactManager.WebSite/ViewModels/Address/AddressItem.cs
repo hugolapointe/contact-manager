@@ -24,5 +24,5 @@ public class AddressItem {
     public DateTime CreatedAt { get; set; }
 
     [Display(Name = "Updated At")]
-    public DateTime UpdateAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }

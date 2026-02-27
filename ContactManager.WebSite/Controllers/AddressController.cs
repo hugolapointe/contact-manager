@@ -13,23 +13,22 @@ namespace ContactManager.WebSite.Controllers;
 [Authorize]
 [ContactOwner("contactId")]
 public class AddressController(ContactManagerContext context) : Controller {
-    private readonly ContactManagerContext _context = context;
 
     [HttpGet]
     public async Task<IActionResult> Index(Guid contactId) {
-        var contact = HttpContext.GetResourceOwned<Contact>();
+        var contact = HttpContext.GetContactOwned();
 
-        var addressItems = await _context.Addresses
+        var addressItems = await context.Addresses
             .AsNoTracking()
             .Where(address => address.ContactId == contactId)
-            .Select(address => new AddressItem() {
+            .Select(address => new AddressItem {
                 Id = address.Id,
                 StreetNumber = address.StreetNumber,
                 StreetName = address.StreetName,
                 City = address.CityName,
                 PostalCode = address.PostalCode,
                 CreatedAt = address.CreatedAt,
-                UpdateAt = address.UpdateAt,
+                UpdatedAt = address.UpdatedAt,
             })
             .ToListAsync();
 
@@ -49,23 +48,23 @@ public class AddressController(ContactManagerContext context) : Controller {
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Guid contactId, AddressCreate viewModel) {
+    public async Task<IActionResult> Create(Guid contactId, [FromForm] AddressCreate viewModel) {
+        // Synchroniser avec la route : la route est la source de vérité (protection anti-tamper).
         viewModel.ContactId = contactId;
 
         if (!ModelState.IsValid) {
             return View(viewModel);
         }
 
-        var contact = HttpContext.GetResourceOwned<Contact>();
-
-        var addressToCreate = Address.Create(
-            contact.Id,
+        var address = Address.Create(
+            contactId,
             viewModel.StreetNumber!.Value,
             viewModel.StreetName!,
             viewModel.CityName!,
             viewModel.PostalCode!);
-        _context.Addresses.Add(addressToCreate);
-        await _context.SaveChangesAsync();
+
+        context.Addresses.Add(address);
+        await context.SaveChangesAsync();
 
         this.AddNotification("Address added successfully.", NotificationType.Success);
         return RedirectToAction(nameof(Index), new { contactId });
@@ -73,16 +72,14 @@ public class AddressController(ContactManagerContext context) : Controller {
 
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id, Guid contactId) {
-        var contact = HttpContext.GetResourceOwned<Contact>();
-
-        var addressToEdit = await _context.Addresses.FindAsync(id);
-        if (addressToEdit is null || addressToEdit.ContactId != contact.Id) {
+        var addressToEdit = await context.Addresses.FindAsync(id);
+        if (addressToEdit is null || addressToEdit.ContactId != contactId) {
             return NotFound();
         }
 
-        var viewModel = new AddressEdit() {
+        var viewModel = new AddressEdit {
             AddressId = id,
-            ContactId = contact.Id,
+            ContactId = contactId,
             StreetNumber = addressToEdit.StreetNumber,
             StreetName = addressToEdit.StreetName,
             CityName = addressToEdit.CityName,
@@ -95,8 +92,9 @@ public class AddressController(ContactManagerContext context) : Controller {
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, Guid contactId, AddressEdit viewModel) {
-        var contact = HttpContext.GetResourceOwned<Contact>();
+        var contact = HttpContext.GetContactOwned();
 
+        // Synchroniser avec la route : la route est la source de vérité (protection anti-tamper).
         viewModel.AddressId = id;
         viewModel.ContactId = contact.Id;
 
@@ -104,7 +102,7 @@ public class AddressController(ContactManagerContext context) : Controller {
             return View(viewModel);
         }
 
-        var addressToEdit = await _context.Addresses.FindAsync(id);
+        var addressToEdit = await context.Addresses.FindAsync(id);
         if (addressToEdit is null || addressToEdit.ContactId != contact.Id) {
             return NotFound();
         }
@@ -114,7 +112,7 @@ public class AddressController(ContactManagerContext context) : Controller {
             viewModel.StreetName!,
             viewModel.CityName!,
             viewModel.PostalCode!);
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         this.AddNotification("Address updated successfully.", NotificationType.Success);
         return RedirectToAction(nameof(Index), new { contactId });
@@ -123,15 +121,15 @@ public class AddressController(ContactManagerContext context) : Controller {
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Remove(Guid id, Guid contactId) {
-        var contact = HttpContext.GetResourceOwned<Contact>();
+        var contact = HttpContext.GetContactOwned();
 
-        var addressToRemove = await _context.Addresses.FindAsync(id);
+        var addressToRemove = await context.Addresses.FindAsync(id);
         if (addressToRemove is null || addressToRemove.ContactId != contact.Id) {
             return NotFound();
         }
 
-        _context.Addresses.Remove(addressToRemove);
-        await _context.SaveChangesAsync();
+        context.Addresses.Remove(addressToRemove);
+        await context.SaveChangesAsync();
 
         this.AddNotification("Address deleted successfully.", NotificationType.Success);
         return RedirectToAction(nameof(Index), new { contactId });

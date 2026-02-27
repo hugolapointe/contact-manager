@@ -20,7 +20,6 @@ public class ContactEdit {
 
     [Display(Name = "Date of Birth")]
     [DataType(DataType.Date)]
-    [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime? DateOfBirth { get; set; }
 
     public class Validator : AbstractValidator<ContactEdit> {
