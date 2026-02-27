@@ -1,7 +1,7 @@
 using ContactManager.Core;
 using ContactManager.Core.Data;
 using ContactManager.Core.Domain.Entities;
-using ContactManager.WebSite.Utilities;
+using ContactManager.WebSite.Configurations;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 

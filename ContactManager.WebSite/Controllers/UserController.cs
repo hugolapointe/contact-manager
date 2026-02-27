@@ -1,8 +1,9 @@
 using ContactManager.Core;
 using ContactManager.Core.Domain.Entities;
-using ContactManager.WebSite.Utilities;
 using ContactManager.WebSite.ViewModels.Shared;
 using ContactManager.WebSite.ViewModels.User;
+using ContactManager.WebSite.Configurations;
+using ContactManager.WebSite.Security;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -85,6 +86,7 @@ public class UserController(
         var roleAssignResult = await userManager.AddToRoleAsync(newUser, roleName);
         if (!roleAssignResult.Succeeded) {
             this.AddModelErrors(roleAssignResult.Errors.Select(error => error.Description));
+            
             // Rollback : supprime l'utilisateur créé si l'assignation du rôle échoue.
             await userManager.DeleteAsync(newUser);
             return View(viewModel);
@@ -98,6 +100,7 @@ public class UserController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ResetPassword(Guid id) {
         var userToReset = await userManager.FindByIdAsync(id.ToString());
+        
         if (userToReset is null) {
             this.AddNotification("User was not found.", NotificationType.Error);
             return RedirectToAction(nameof(Index));
@@ -129,6 +132,7 @@ public class UserController(
         }
 
         var userToRemove = await userManager.FindByIdAsync(id.ToString());
+        
         if (userToRemove is null) {
             this.AddNotification("User was not found.", NotificationType.Error);
             return RedirectToAction(nameof(Index));

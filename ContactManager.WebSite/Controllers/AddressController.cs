@@ -1,8 +1,8 @@
 using ContactManager.Core;
 using ContactManager.Core.Domain.Entities;
 using ContactManager.WebSite.Authorization;
-using ContactManager.WebSite.Utilities;
 using ContactManager.WebSite.ViewModels.Address;
+using ContactManager.WebSite.Configurations;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
